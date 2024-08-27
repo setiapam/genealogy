@@ -78,7 +78,6 @@ return [
     'birthname'   => 'Geboortenaam',
     'nickname'    => 'Bijnaam',
     'sex'         => 'Geslacht',
-    'gender'      => 'Gender identiteit',
     'father'      => 'Vader',
     'mother'      => 'Moeder',
     'parent'      => 'Ouder',

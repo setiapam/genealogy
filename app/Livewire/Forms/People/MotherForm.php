@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Forms\People;
 
-use App\Models\Gender;
 use App\Rules\DobValid;
 use App\Rules\YobValid;
 use Illuminate\Support\Collection;
@@ -26,8 +25,6 @@ class MotherForm extends Form
 
     public $nickname = null;
 
-    public $gender_id = null;
-
     #[Validate]
     public $yob = null;
 
@@ -42,13 +39,6 @@ class MotherForm extends Form
     public $person_id = null;
 
     // -----------------------------------------------------------------------
-    #[Computed(persist: true, seconds: 3600, cache: true)]
-    public function genders(): Collection
-    {
-        return Gender::select('id', 'name')->orderBy('name')->get();
-    }
-
-    // -----------------------------------------------------------------------
     public function rules(): array
     {
         return $rules = [
@@ -56,8 +46,6 @@ class MotherForm extends Form
             'surname'   => ['nullable', 'string', 'max:255', 'required_without:person_id'],
             'birthname' => ['nullable', 'string', 'max:255'],
             'nickname'  => ['nullable', 'string', 'max:255'],
-
-            'gender_id' => ['nullable', 'integer'],
 
             'yob' => [
                 'nullable',
@@ -96,8 +84,6 @@ class MotherForm extends Form
             'surname'   => __('person.surname'),
             'birthname' => __('person.birthname'),
             'nickname'  => __('person.nickname'),
-
-            'gender_id' => __('person.gender'),
 
             'yob' => __('person.yob'),
             'dob' => __('person.dob'),

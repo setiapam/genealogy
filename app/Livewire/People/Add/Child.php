@@ -42,7 +42,6 @@ class Child extends Component
         $this->childForm->nickname  = null;
 
         $this->childForm->sex       = null;
-        $this->childForm->gender_id = null;
 
         $this->childForm->yob = null;
         $this->childForm->dob = null;
@@ -158,7 +157,6 @@ class Child extends Component
                         'birthname' => $validated['birthname'],
                         'nickname'  => $validated['nickname'],
                         'sex'       => $validated['sex'],
-                        'gender_id' => $validated['gender_id'] ?? null,
                         'yob'       => $validated['yob'],
                         'dob'       => $validated['dob'],
                         'pob'       => $validated['pob'],
@@ -172,7 +170,6 @@ class Child extends Component
                         'birthname' => $validated['birthname'],
                         'nickname'  => $validated['nickname'],
                         'sex'       => $validated['sex'],
-                        'gender_id' => $validated['gender_id'] ?? null,
                         'yob'       => $validated['yob'],
                         'dob'       => $validated['dob'],
                         'pob'       => $validated['pob'],
@@ -206,7 +203,6 @@ class Child extends Component
         $this->childForm->nickname != null or
 
         $this->childForm->sex != null or
-        $this->childForm->gender_id != null or
 
         $this->childForm->yob != null or
         $this->childForm->dob != null or

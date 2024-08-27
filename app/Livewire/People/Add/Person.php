@@ -36,7 +36,6 @@ class Person extends Component
         $this->personForm->nickname  = null;
 
         $this->personForm->sex       = null;
-        $this->personForm->gender_id = null;
 
         $this->personForm->yob = null;
         $this->personForm->dob = null;
@@ -108,7 +107,6 @@ class Person extends Component
                 'birthname' => $validated['birthname'],
                 'nickname'  => $validated['nickname'],
                 'sex'       => $validated['sex'],
-                'gender_id' => $validated['gender_id'] ?? null,
                 'yob'       => $validated['yob'],
                 'dob'       => $validated['dob'],
                 'pob'       => $validated['pob'],
@@ -139,7 +137,6 @@ class Person extends Component
         $this->personForm->nickname != null or
 
         $this->personForm->sex != null or
-        $this->personForm->gender_id != null or
 
         $this->personForm->yob != null or
         $this->personForm->dob != null or

@@ -41,8 +41,6 @@ class Mother extends Component
         $this->motherForm->birthname = null;
         $this->motherForm->nickname  = null;
 
-        $this->motherForm->gender_id = null;
-
         $this->motherForm->yob = null;
         $this->motherForm->dob = null;
         $this->motherForm->pob = null;
@@ -134,7 +132,6 @@ class Mother extends Component
                     'birthname' => $validated['birthname'],
                     'nickname'  => $validated['nickname'],
                     'sex'       => 'f',
-                    'gender_id' => $validated['gender_id'] ?? null,
                     'yob'       => $validated['yob'],
                     'dob'       => $validated['dob'],
                     'pob'       => $validated['pob'],
@@ -168,8 +165,6 @@ class Mother extends Component
         $this->motherForm->surname != null or
         $this->motherForm->birthname != null or
         $this->motherForm->nickname != null or
-
-        $this->motherForm->gender_id != null or
 
         $this->motherForm->yob != null or
         $this->motherForm->dob != null or

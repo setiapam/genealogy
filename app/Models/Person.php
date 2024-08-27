@@ -36,7 +36,6 @@ class Person extends Model implements HasMedia
         'nickname',
 
         'sex',
-        'gender_id',
 
         'father_id',
         'mother_id',
@@ -376,12 +375,6 @@ class Person extends Model implements HasMedia
     public function team(): BelongsTo
     {
         return $this->BelongsTo(Team::class);
-    }
-
-    /* lookup table */
-    public function gender(): BelongsTo
-    {
-        return $this->BelongsTo(Gender::class);
     }
 
     /* returns FATHER (1 Person) based on father_id */

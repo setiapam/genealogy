@@ -43,7 +43,6 @@ class Partner extends Component
         $this->partnerForm->nickname  = null;
 
         $this->partnerForm->sex       = null;
-        $this->partnerForm->gender_id = null;
 
         $this->partnerForm->yob = null;
         $this->partnerForm->dob = null;
@@ -154,7 +153,6 @@ class Partner extends Component
                         'birthname' => $validated['birthname'],
                         'nickname'  => $validated['nickname'],
                         'sex'       => $validated['sex'],
-                        'gender_id' => $validated['gender_id'] ?? null,
                         'yob'       => $validated['yob'],
                         'dob'       => $validated['dob'],
                         'pob'       => $validated['pob'],
@@ -218,7 +216,6 @@ class Partner extends Component
         $this->partnerForm->nickname != null or
 
         $this->partnerForm->sex != null or
-        $this->partnerForm->gender_id != null or
 
         $this->partnerForm->yob != null or
         $this->partnerForm->dob != null or

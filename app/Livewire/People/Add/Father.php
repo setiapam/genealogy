@@ -41,8 +41,6 @@ class Father extends Component
         $this->fatherForm->birthname = null;
         $this->fatherForm->nickname  = null;
 
-        $this->fatherForm->gender_id = null;
-
         $this->fatherForm->yob = null;
         $this->fatherForm->dob = null;
         $this->fatherForm->pob = null;
@@ -134,7 +132,6 @@ class Father extends Component
                     'birthname' => $validated['birthname'],
                     'nickname'  => $validated['nickname'],
                     'sex'       => 'm',
-                    'gender_id' => $validated['gender_id'] ?? null,
                     'yob'       => $validated['yob'],
                     'dob'       => $validated['dob'],
                     'pob'       => $validated['pob'],
@@ -168,8 +165,6 @@ class Father extends Component
         $this->fatherForm->surname != null or
         $this->fatherForm->birthname != null or
         $this->fatherForm->nickname != null or
-
-        $this->fatherForm->gender_id != null or
 
         $this->fatherForm->yob != null or
         $this->fatherForm->dob != null or

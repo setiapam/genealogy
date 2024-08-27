@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('nickname')->nullable()->index();
 
             $table->string('sex', 1)->default('m')->index();
-            $table->foreignId('gender_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('restrict');
 
             $table->unsignedBigInteger('father_id')->nullable()->index();
             $table->unsignedBigInteger('mother_id')->nullable()->index();

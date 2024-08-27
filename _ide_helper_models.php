@@ -13,7 +13,7 @@
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property-write string|null $iso2
@@ -42,7 +42,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $person1_id
@@ -84,26 +84,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
  *
- * @property int $id
- * @property string $name
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @method static \Illuminate\Database\Eloquent\Builder|Gender newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Gender newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Gender query()
- * @method static \Illuminate\Database\Eloquent\Builder|Gender whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Gender whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Gender whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Gender whereUpdatedAt($value)
- */
-	class Gender extends \Eloquent {}
-}
-
-namespace App\Models{
-/**
- * 
  *
  * @property int $id
  * @property int $team_id
@@ -126,7 +107,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property string|null $firstname
@@ -134,7 +115,6 @@ namespace App\Models{
  * @property string|null $birthname
  * @property string|null $nickname
  * @property string $sex
- * @property int|null $gender_id
  * @property int|null $father_id
  * @property int|null $mother_id
  * @property int|null $parents_id
@@ -161,7 +141,6 @@ namespace App\Models{
  * @property-read int|null $activities_count
  * @property-read \App\Models\Country|null $country
  * @property-read Person|null $father
- * @property-read \App\Models\Gender|null $gender
  * @property-read string|null $address
  * @property-read string|null $address_google
  * @property-read int|null $age
@@ -199,7 +178,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Person whereDod($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Person whereFatherId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Person whereFirstname($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Person whereGenderId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Person whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Person whereMotherId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Person whereNickname($value)
@@ -228,7 +206,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $person_id
@@ -253,7 +231,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $user_id
@@ -288,7 +266,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $team_id
@@ -312,7 +290,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property string|null $firstname
@@ -378,7 +356,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $user_id
