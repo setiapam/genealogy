@@ -1,6 +1,6 @@
 <div class="flex justify-between p-2 text-xs bg-neutral-200 dark:bg-neutral-700">
     <div class="text-left">
-        Copyright © {{ date('Y') }} | <x-link href="https://www.kreaweb.be/" target="_blank">KREAWEB</x-link>.<br />
+        Copyright © {{ date('Y') }} | <x-link href="https://murphi.my.id/" target="_blank">Murphi</x-link>.<br />
         {{ __('app.open_source') }} <x-link href="/about">{{ __('app.licence') }}</x-link>.<br />
         {{ __('app.free_use') }}.
     </div>
@@ -8,11 +8,11 @@
     <div class="flex items-center">
         <div class="px-2 text-right">
             {{ __('app.design_development') }}<br />
-            {{ __('app.by') }} <x-link href="https://www.kreaweb.be/" target="_blank">KREAWEB</x-link>
+            {{ __('app.by') }} <x-link href="https://murphi.my.id/" target="_blank">Murphi</x-link>
         </div>
 
-        <a href="https://www.kreaweb.be/" target="_blank" title="Kreaweb">
+        {{-- <a href="https://www.kreaweb.be/" target="_blank" title="Kreaweb">
             <x-svg.kreaweb class="size-11 dark:fill-white hover:fill-primary-300 dark:hover:fill-primary-300" alt="kreaweb" />
-        </a>
+        </a> --}}
     </div>
 </div>

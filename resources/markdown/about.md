@@ -4,6 +4,8 @@ Copyright &copy; : 2017 <a href="https://github.com/nafiesl/silsilah" target="_b
 
 Copyright &copy; : 2023 <a href="https://www.kreaweb.be" target="_blank">kreaweb.be</a>
 
+Copyright &copy; : 2024 <a href="https://murphi.my.id" target="_blank">Dimas Setia Pambudi</a>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "<b>Software</b>"), to deal
 in the Software without restriction, including without limitation the rights
