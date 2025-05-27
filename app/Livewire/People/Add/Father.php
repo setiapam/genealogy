@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\People\Add;
 
-use App\Livewire\Forms\People\FatherForm;
+use App\Livewire\Forms\People\PersonForm;
 use App\Livewire\Traits\TrimStringsAndConvertEmptyStringsToNull;
 use App\Models\Person;
 use App\PersonPhotos;
+use App\Rules\DobValid;
+use App\Rules\YobValid;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -17,39 +20,21 @@ use TallStackUi\Traits\Interactions;
 
 final class Father extends Component
 {
-    use Interactions;
+    use Interactions, WithFileUploads;
     use TrimStringsAndConvertEmptyStringsToNull;
-    use WithFileUploads;
 
     // -----------------------------------------------------------------------
-    public $person;
+    public Person $person;
 
-    public FatherForm $fatherForm;
-
-    public array $photos = [];
-
-    public array $backup = [];
+    public PersonForm $form;
 
     public Collection $persons;
+
+    public ?string $selectedTab = null;
 
     // -----------------------------------------------------------------------
     public function mount(): void
     {
-        $this->fatherForm->firstname = null;
-        $this->fatherForm->surname   = null;
-        $this->fatherForm->birthname = null;
-        $this->fatherForm->nickname  = null;
-
-        $this->fatherForm->gender_id = null;
-
-        $this->fatherForm->yob = null;
-        $this->fatherForm->dob = null;
-        $this->fatherForm->pob = null;
-
-        $this->fatherForm->photo = null;
-
-        $this->fatherForm->person_id = null;
-
         $this->persons = Person::where('id', '!=', $this->person->id)
             ->where('sex', 'm')
             ->OlderThan($this->person->birth_year)
@@ -59,6 +44,24 @@ final class Father extends Component
                 'id'   => $p->id,
                 'name' => $p->name . ($p->birth_formatted ? ' (' . $p->birth_formatted . ')' : ''),
             ]);
+
+        $this->selectedTab = $this->persons->isEmpty() ? __('person.add_new_person_as_father') : __('person.add_existing_person_as_father');
+    }
+
+    public function updatingUploads(): void
+    {
+        $this->form->backup = $this->form->uploads;
+    }
+
+    public function updatedUploads(): void
+    {
+        if (empty($this->form->uploads)) {
+            return;
+        }
+
+        $this->form->uploads = collect(array_merge($this->form->backup, (array) $this->form->uploads))
+            ->unique(fn (UploadedFile $file): string => $file->getClientOriginalName())
+            ->toArray();
     }
 
     public function deleteUpload(array $content): void
@@ -74,103 +77,116 @@ final class Father extends Component
             ]
         */
 
-        if (empty($this->uploads)) {
+        if (empty($this->form->uploads)) {
             return;
         }
 
-        $this->uploads = collect($this->uploads)
+        $this->form->uploads = collect($this->form->uploads)
             ->filter(fn (UploadedFile $file): bool => $file->getFilename() !== $content['temporary_name'])
             ->values()
             ->toArray();
 
         rescue(
-            fn () => UploadedFile::deleteTemporaryFile($content['temporary_name']),
+            fn () => File::delete(storage_path('app/livewire-tmp/' . $content['temporary_name'])),
             report: false
         );
     }
 
-    public function updatingUploads(): void
-    {
-        $this->backup = $this->uploads;
-    }
-
-    public function updatedUploads(): void
-    {
-        if (empty($this->uploads)) {
-            return;
-        }
-
-        $this->uploads = collect(array_merge($this->backup, (array) $this->uploads))
-            ->unique(fn (UploadedFile $file): string => $file->getClientOriginalName())
-            ->toArray();
-    }
-
     public function saveFather(): void
     {
-        if ($this->isDirty()) {
-            $validated = $this->fatherForm->validate();
+        $validated = $this->validate($this->rules());
 
-            if (isset($validated['person_id'])) {
-                $this->person->update([
-                    'father_id' => $validated['person_id'],
-                ]);
+        if (isset($validated['form']['person_id'])) {
+            $this->person->update([
+                'father_id' => $validated['form']['person_id'],
+            ]);
 
-                $this->toast()->success(__('app.save'), $this->person->name . ' ' . __('app.saved') . '.')->flash()->send();
-            } else {
-                $new_person = Person::create([
-                    'firstname' => $validated['firstname'],
-                    'surname'   => $validated['surname'],
-                    'birthname' => $validated['birthname'],
-                    'nickname'  => $validated['nickname'],
-                    'sex'       => 'm',
-                    'gender_id' => $validated['gender_id'] ?? null,
-                    'yob'       => $validated['yob'],
-                    'dob'       => $validated['dob'],
-                    'pob'       => $validated['pob'],
-                    'team_id'   => $this->person->team_id,
-                ]);
+            $this->toast()->success(__('app.save'), __('person.existing_person_linked_as_father'))->flash()->send();
+        } else {
+            $newFather = Person::create(array_merge(
+                collect($validated['form'])->only(['firstname', 'surname', 'birthname', 'nickname', 'gender_id', 'yob', 'dob', 'pob'])->toArray(),
+                [
+                    'sex'     => 'm',
+                    'team_id' => $this->person->team_id,
+                ]
+            ));
 
-                if ($this->photos) {
-                    $personPhotos = new PersonPhotos($new_person);
-                    $personPhotos->save($this->photos);
-                }
-
-                $this->person->update([
-                    'father_id' => $new_person->id,
-                ]);
-
-                $this->toast()->success(__('app.create'), $new_person->name . ' ' . __('app.created') . '.')->flash()->send();
+            if ($this->form->uploads) {
+                $photos = new PersonPhotos($newFather);
+                $photos->save($this->form->uploads);
             }
 
-            $this->redirect('/people/' . $this->person->id);
+            $this->person->update([
+                'father_id' => $newFather->id,
+            ]);
+
+            $this->toast()->success(__('app.create'), __('person.new_person_linked_as_father'))->flash()->send();
         }
-    }
 
-    public function resetFather(): void
-    {
-        $this->mount();
-    }
-
-    public function isDirty(): bool
-    {
-        return
-        $this->fatherForm->firstname !== null or
-        $this->fatherForm->surname !== null or
-        $this->fatherForm->birthname !== null or
-        $this->fatherForm->nickname !== null or
-
-        $this->fatherForm->gender_id !== null or
-
-        $this->fatherForm->yob !== null or
-        $this->fatherForm->dob !== null or
-        $this->fatherForm->pob !== null or
-
-        $this->fatherForm->person_id;
+        $this->redirect(route('people.show', $this->person->id));
     }
 
     // -----------------------------------------------------------------------
     public function render(): View
     {
         return view('livewire.people.add.father');
+    }
+
+    // ------------------------------------------------------------------------------
+    protected function rules(): array
+    {
+        return [
+            'form.firstname' => ['nullable', 'string', 'max:255'],
+            'form.surname'   => ['nullable', 'string', 'max:255', 'required_without:form.person_id'],
+            'form.birthname' => ['nullable', 'string', 'max:255'],
+            'form.nickname'  => ['nullable', 'string', 'max:255'],
+            'form.gender_id' => ['nullable', 'integer'],
+            'form.yob'       => ['nullable', 'integer', 'min:1', 'max:' . date('Y'), new YobValid],
+            'form.dob'       => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today', new DobValid],
+            'form.pob'       => ['nullable', 'string', 'max:255'],
+            'form.uploads.*' => [
+                'file',
+                'mimetypes:' . implode(',', array_keys(config('app.upload_photo_accept'))),
+                'max:' . config('app.upload_max_size'),
+            ],
+
+            'form.person_id' => ['nullable', 'integer', 'exists:people,id', 'required_without:form.surname'],
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'form.surname.required_without'   => __('validation.surname.required_without'),
+            'form.person_id.required_without' => __('validation.person_id.required_without'),
+
+            'form.uploads.*.file'      => __('validation.file', ['attribute' => __('person.photo')]),
+            'form.uploads.*.mimetypes' => __('validation.mimetypes', [
+                'attribute' => __('person.photo'),
+                'values'    => implode(', ', array_values(config('app.upload_photo_accept'))),
+            ]),
+            'form.uploads.*.max' => __('validation.max.file', [
+                'attribute' => __('person.photo'),
+                'max'       => config('app.upload_max_size'),
+            ]),
+        ];
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [
+            'form.firstname' => __('person.firstname'),
+            'form.surname'   => __('person.surname'),
+            'form.birthname' => __('person.birthname'),
+            'form.nickname'  => __('person.nickname'),
+
+            'form.gender_id' => __('person.gender'),
+            'form.yob'       => __('person.yob'),
+            'form.dob'       => __('person.dob'),
+            'form.pob'       => __('person.pob'),
+            'form.uploads'   => __('person.photos'),
+
+            'form.person_id' => __('person.person'),
+        ];
     }
 }

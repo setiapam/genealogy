@@ -15,27 +15,36 @@ use Livewire\Form;
 final class PersonForm extends Form
 {
     // -----------------------------------------------------------------------
-    public $firstname;
+    // New person fields
+    // -----------------------------------------------------------------------
+    public ?string $firstname = null;
 
-    public $surname;
+    public ?string $surname = null;
 
-    public $birthname;
+    public ?string $birthname = null;
 
-    public $nickname;
+    public ?string $nickname = null;
 
-    public $sex;
+    public ?string $sex = null;
 
-    public $gender_id;
+    public ?string $gender_id = null;
 
     #[Validate]
-    public $yob;
+    public ?string $yob = null;
 
     #[Validate]
-    public $dob;
+    public ?string $dob = null;
 
-    public $pob;
+    public ?string $pob = null;
 
-    public $photo;
+    public array $uploads = [];
+
+    public array $backup = [];
+
+    // -----------------------------------------------------------------------
+    // Existing person fields
+    // -----------------------------------------------------------------------
+    public ?int $person_id = null;
 
     // -----------------------------------------------------------------------
     #[Computed(persist: true, seconds: 3600, cache: true)]
@@ -45,57 +54,62 @@ final class PersonForm extends Form
     }
 
     // -----------------------------------------------------------------------
-    public function rules(): array
+    protected function rules(): array
     {
-        return $rules = [
+        return [
             'firstname' => ['nullable', 'string', 'max:255'],
-            'surname'   => ['required', 'string', 'max:255'],
+            'surname'   => ['nullable', 'string', 'max:255', 'required_without:person_id'],
             'birthname' => ['nullable', 'string', 'max:255'],
             'nickname'  => ['nullable', 'string', 'max:255'],
-
-            'sex'       => ['required', 'in:m,f'],
+            'sex'       => ['nullable', 'string', 'max:1', 'in:m,f', 'required_without:person_id'],
             'gender_id' => ['nullable', 'integer'],
-
-            'yob' => [
-                'nullable',
-                'integer',
-                'min:1',
-                'max:' . date('Y'),
-                new YobValid,
+            'yob'       => ['nullable', 'integer', 'min:1', 'max:' . date('Y'), new YobValid],
+            'dob'       => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today', new DobValid],
+            'pob'       => ['nullable', 'string', 'max:255'],
+            'uploads.*' => [
+                'file',
+                'mimetypes:' . implode(',', array_keys(config('app.upload_photo_accept'))),
+                'max:' . config('app.upload_max_size'),
             ],
-            'dob' => [
-                'nullable',
-                'date_format:Y-m-d',
-                'before_or_equal:today',
-                new DobValid,
-            ],
-            'pob' => ['nullable', 'string', 'max:255'],
 
-            'photo' => ['nullable', 'string', 'max:255'],
+            'person_id' => ['nullable', 'integer', 'exists:people,id', 'required_without:surname'],
         ];
     }
 
-    public function messages(): array
+    protected function messages(): array
     {
-        return [];
+        return [
+            'surname.required_without'   => __('validation.surname.required_without'),
+            'sex.required_without'       => __('validation.sex.required_without'),
+            'person_id.required_without' => __('validation.person_id.required_without'),
+
+            'uploads.*.file'      => __('validation.file', ['attribute' => __('person.photo')]),
+            'uploads.*.mimetypes' => __('validation.mimetypes', [
+                'attribute' => __('person.photo'),
+                'values'    => implode(', ', array_values(config('app.upload_photo_accept'))),
+            ]),
+            'uploads.*.max' => __('validation.max.file', [
+                'attribute' => __('person.photo'),
+                'max'       => config('app.upload_max_size'),
+            ]),
+        ];
     }
 
-    public function validationAttributes(): array
+    protected function validationAttributes(): array
     {
         return [
             'firstname' => __('person.firstname'),
             'surname'   => __('person.surname'),
             'birthname' => __('person.birthname'),
             'nickname'  => __('person.nickname'),
-
             'sex'       => __('person.sex'),
             'gender_id' => __('person.gender'),
+            'yob'       => __('person.yob'),
+            'dob'       => __('person.dob'),
+            'pob'       => __('person.pob'),
+            'uploads'   => __('person.photos'),
 
-            'yob' => __('person.yob'),
-            'dob' => __('person.dob'),
-            'pob' => __('person.pob'),
-
-            'photo' => __('person.photo'),
+            'person_id' => __('person.person'),
         ];
     }
 }

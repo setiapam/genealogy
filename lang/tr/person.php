@@ -110,12 +110,15 @@ return [
     'cemetery_location' => 'Mezarlık Konumu',
 
     // files
-    'upload_files'     => 'Dosya yükle',
     'files'            => 'Dosyalar',
     'files_saved'      => '[0] Hiçbir dosya kaydedilmedi|[1] Dosya kaydedildi|[2,*] Dosyalar kaydedildi',
     'file'             => 'Dosya',
     'file_deleted'     => 'Dosya silindi',
-    'update_files_tip' => 'Yeni dosyalarınızı buraya sürükleyip bırakın',
+    'upload_files'     => 'Dosya yükle',
+    'upload_files_tip' => 'Yeni dosyalarınızı buraya sürükleyip bırakın ...',
+
+    'upload_accept_types' => 'İzin verilmiş: :types',
+    'upload_max_size'     => 'Maksimum boyut : :max KB',
 
     // Photo
     'avatar'            => 'Avatar',
@@ -127,7 +130,7 @@ return [
     'photos_existing'   => 'Mevcut fotoğraflar',
     'set_primary'       => 'Birincil olarak ayarla',
     'upload_photos'     => 'Fotoğraf yükle',
-    'update_photos_tip' => 'Yeni fotoğraflarınızı buraya sürükleyip bırakın',
+    'upload_photos_tip' => 'Yeni fotoğraflarınızı buraya sürükleyip bırakın ...',
 
     // Messages
     'yod_not_matching_dod' => 'Ölüm yılı, ölüm tarihiyle eşleşmelidir (:value).',
@@ -148,4 +151,16 @@ return [
 
     'not_found' => 'Kişi bulunamadı',
     'use_tab'   => 'Sekme kullanın',
+
+    'existing_person_linked_as_father'  => 'Mevcut kişi baba olarak bağlandı.',
+    'new_person_linked_as_father'       => 'Yeni kişi baba olarak bağlandı.',
+    'existing_person_linked_as_mother'  => 'Mevcut kişi anne olarak bağlandı.',
+    'new_person_linked_as_mother'       => 'Yeni kişi anne olarak bağlandı.',
+    'existing_person_linked_as_child'   => 'Mevcut kişi çocuk olarak bağlandı.',
+    'new_person_linked_as_child'        => 'Yeni kişi çocuk olarak bağlandı.',
+    'existing_person_linked_as_partner' => 'Mevcut kişi eş olarak bağlandı.',
+    'new_person_linked_as_parther'      => 'Yeni kişi eş olarak bağlandı.',
+
+    'family_caution_1' => 'Baba ve Anne yalnızca biyolojik ebeveynler için kullanılmalı ve bu nedenle zıt cinsiyetlerde olmalıdır.',
+    'family_caution_2' => 'Ebeveynler biyolojik olabilir, ancak biyolojik olmayan (eşcinsel veya evlat edinen) ebeveynler de olabilir. Bu durumda Baba ve Anne alanlarını boş bırakın.',
 ];

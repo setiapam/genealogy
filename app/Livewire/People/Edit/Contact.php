@@ -19,55 +19,41 @@ final class Contact extends Component
     // -----------------------------------------------------------------------
     public Person $person;
 
-    public ContactForm $contactForm;
+    public ContactForm $form;
 
     // -----------------------------------------------------------------------
     public function mount(): void
     {
-        $this->contactForm->street      = $this->person->street;
-        $this->contactForm->number      = $this->person->number;
-        $this->contactForm->postal_code = $this->person->postal_code;
-        $this->contactForm->city        = $this->person->city;
-        $this->contactForm->province    = $this->person->province;
-        $this->contactForm->state       = $this->person->state;
-        $this->contactForm->country     = $this->person->country;
-        $this->contactForm->phone       = $this->person->phone;
+        $this->loadData();
     }
 
     public function saveContact(): void
     {
-        if ($this->isDirty()) {
-            $validated = $this->contactForm->validate();
+        $validated = $this->form->validate();
 
-            $this->person->update($validated);
+        $this->person->update($validated);
 
-            $this->dispatch('person_updated');
+        $this->dispatch('person_updated');
 
-            $this->toast()->success(__('app.save'), __('app.saved'))->send();
-        }
-    }
-
-    public function resetContact(): void
-    {
-        $this->mount();
-    }
-
-    public function isDirty(): bool
-    {
-        return
-            $this->contactForm->street !== $this->person->street or
-            $this->contactForm->number !== $this->person->number or
-            $this->contactForm->postal_code !== $this->person->postal_code or
-            $this->contactForm->city !== $this->person->city or
-            $this->contactForm->province !== $this->person->province or
-            $this->contactForm->state !== $this->person->state or
-            $this->contactForm->country !== $this->person->country or
-            $this->contactForm->phone !== $this->person->phone;
+        $this->toast()->success(__('app.save'), __('app.saved'))->send();
     }
 
     // ------------------------------------------------------------------------------
     public function render(): View
     {
         return view('livewire.people.edit.contact');
+    }
+
+    // ------------------------------------------------------------------------------
+    private function loadData(): void
+    {
+        $this->form->street      = $this->person->street;
+        $this->form->number      = $this->person->number;
+        $this->form->postal_code = $this->person->postal_code;
+        $this->form->city        = $this->person->city;
+        $this->form->province    = $this->person->province;
+        $this->form->state       = $this->person->state;
+        $this->form->country     = $this->person->country;
+        $this->form->phone       = $this->person->phone;
     }
 }

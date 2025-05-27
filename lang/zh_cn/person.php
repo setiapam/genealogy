@@ -110,12 +110,15 @@ return [
     'cemetery_location' => '墓地位置',
 
     // files
-    'upload_files'     => '上传文件',
     'files'            => '文件',
     'files_saved'      => '[0] 没有文件保存|[1] 文件已保存|[2,*] 文件已保存',
     'file'             => '文件',
     'file_deleted'     => '文件已删除',
-    'update_files_tip' => '将文件拖放到此处',
+    'upload_files'     => '上传文件',
+    'upload_files_tip' => '将文件拖放到此处 ...',
+
+    'upload_accept_types' => '允许 : :types',
+    'upload_max_size'     => '最大尺寸 : :max KB',
 
     // Photo
     'avatar'            => '头像',
@@ -127,7 +130,7 @@ return [
     'photos_existing'   => '现有照片',
     'set_primary'       => '设为主照片',
     'upload_photos'     => '上传照片',
-    'update_photos_tip' => '将照片拖放到此处',
+    'upload_photos_tip' => '将照片拖放到此处 ...',
 
     // Messages
     'yod_not_matching_dod' => '死亡年份必须与死亡日期匹配 (:value)。',
@@ -148,4 +151,16 @@ return [
 
     'not_found' => '没有找到此人',
     'use_tab'   => '使用选项卡',
+
+    'existing_person_linked_as_father'  => '现有人员已作为父亲关联。',
+    'new_person_linked_as_father'       => '新人员已作为父亲关联。',
+    'existing_person_linked_as_mother'  => '现有人员已作为母亲关联。',
+    'new_person_linked_as_mother'       => '新人员已作为母亲关联。',
+    'existing_person_linked_as_child'   => '现有人员已作为子女关联。',
+    'new_person_linked_as_child'        => '新人员已作为子女关联。',
+    'existing_person_linked_as_partner' => '现有人员已作为配偶关联。',
+    'new_person_linked_as_parther'      => '新人员已作为配偶关联。',
+
+    'family_caution_1' => '父亲和母亲只能用于生物学父母，因此必须是异性。',
+    'family_caution_2' => '父母可以是生物学父母，也可以是非生物学父母（同性或收养）。在这种情况下，只需将父亲和母亲留空。',
 ];

@@ -110,12 +110,15 @@ return [
     'cemetery_location' => 'Locatie begraafplaats',
 
     // Files
-    'upload_files'     => 'Bestanden uploaden',
     'files'            => 'Bestanden',
     'files_saved'      => '[0] Geen bestand bewaard|[1] Bestand bewaard|[2,*] Bestanden bewaard',
     'file'             => 'Bestand',
     'file_deleted'     => 'Bestand verwijderd',
-    'update_files_tip' => 'Sleep uw nieuwe bestanden hierheen',
+    'upload_files'     => 'Bestanden uploaden',
+    'upload_files_tip' => 'Sleep uw nieuwe bestanden hierheen ...',
+
+    'upload_accept_types' => 'Toegestaan: :types',
+    'upload_max_size'     => 'Maximale grootte : :max KB',
 
     // Photo
     'avatar'            => 'Avatar',
@@ -127,7 +130,7 @@ return [
     'photos_existing'   => 'Bestaande afbeeldingen',
     'set_primary'       => 'Als primaire afbeelding instellen',
     'upload_photos'     => 'Afbeeldingen uploaden',
-    'update_photos_tip' => 'Sleep uw nieuwe afbeeldingen hierheen',
+    'upload_photos_tip' => 'Sleep uw nieuwe afbeeldingen hierheen ...',
 
     // Messages
     'yod_not_matching_dod' => 'Het Jaar overlijden moet overeenkomen met de Datum overlijden (:value).',
@@ -148,4 +151,16 @@ return [
 
     'not_found' => 'Persoon niet gevonden',
     'use_tab'   => 'Gebruik tab',
+
+    'existing_person_linked_as_father'  => 'Bestaande persoon gekoppeld als vader.',
+    'new_person_linked_as_father'       => 'Nieuwe persoon gekoppeld als vader.',
+    'existing_person_linked_as_mother'  => 'Bestaande persoon gekoppeld als moeder.',
+    'new_person_linked_as_mother'       => 'Nieuwe persoon gekoppeld als moeder.',
+    'existing_person_linked_as_child'   => 'Bestaande persoon gekoppeld als kind.',
+    'new_person_linked_as_child'        => 'Nieuwe persoon gekoppeld als kind.',
+    'existing_person_linked_as_partner' => 'Bestaande persoon gekoppeld als partner.',
+    'new_person_linked_as_parther'      => 'Nieuwe persoon gekoppeld als partner.',
+
+    'family_caution_1' => 'Vader en Moeder mogen alleen worden gebruikt voor de biologische ouders en moeten daarom van verschillend geslacht zijn.',
+    'family_caution_2' => 'Ouders kunnen de biologische ouders zijn, maar ook niet-biologische (homoseksuele of adoptieve) ouders. Laat in dat geval Vader en Moeder gewoon leeg.',
 ];

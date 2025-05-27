@@ -4,74 +4,61 @@ declare(strict_types=1);
 
 namespace App\Livewire\People\Add;
 
-use App\Livewire\Forms\People\ChildForm;
+use App\Livewire\Forms\People\PersonForm;
 use App\Livewire\Traits\TrimStringsAndConvertEmptyStringsToNull;
 use App\Models\Person;
 use App\PersonPhotos;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use TallStackUi\Traits\Interactions;
 
-final class Child extends Component
+class Child extends Component
 {
-    use Interactions;
+    use Interactions, WithFileUploads;
     use TrimStringsAndConvertEmptyStringsToNull;
-    use WithFileUploads;
 
-    // -----------------------------------------------------------------------
-    public $person;
+    public Person $person;
 
-    public ChildForm $childForm;
-
-    public array $photos = [];
-
-    public array $backup = [];
+    public PersonForm $form;
 
     public Collection $persons;
 
-    // -----------------------------------------------------------------------
+    public ?string $selectedTab = null;
+
     public function mount(): void
     {
-        $this->childForm->firstname = null;
-        $this->childForm->surname   = null;
-        $this->childForm->birthname = null;
-        $this->childForm->nickname  = null;
+        $this->persons = Person::where('id', '!=', $this->person->id)
+            ->whereNull($this->person->sex === 'm' ? 'father_id' : 'mother_id')
+            ->YoungerThan($this->person->birth_year)
+            ->orderBy('firstname')
+            ->orderBy('surname')
+            ->get()
+            ->map(fn ($p): array => [
+                'id'   => $p->id,
+                'name' => $p->name . ' [' . ($p->sex === 'm' ? __('app.male') : __('app.female')) . '] ' . ($p->birth_formatted ? ' (' . $p->birth_formatted . ')' : ''),
+            ]);
 
-        $this->childForm->sex       = null;
-        $this->childForm->gender_id = null;
+        $this->selectedTab = $this->persons->isEmpty() ? __('person.add_new_person_as_child') : __('person.add_existing_person_as_child');
+    }
 
-        $this->childForm->yob = null;
-        $this->childForm->dob = null;
-        $this->childForm->pob = null;
+    public function updatingUploads(): void
+    {
+        $this->form->backup = $this->form->uploads;
+    }
 
-        $this->childForm->photo = null;
-
-        $this->childForm->person_id = null;
-
-        if ($this->person->sex === 'm') {
-            $this->persons = Person::where('id', '!=', $this->person->id)
-                ->whereNull('father_id')
-                ->YoungerThan($this->person->birth_year)
-                ->orderBy('firstname')->orderBy('surname')
-                ->get()
-                ->map(fn ($p): array => [
-                    'id'   => $p->id,
-                    'name' => $p->name . ' [' . (($p->sex === 'm') ? __('app.male') : __('app.female')) . '] ' . ($p->birth_formatted ? ' (' . $p->birth_formatted . ')' : ''),
-                ]);
-        } else {
-            $this->persons = Person::where('id', '!=', $this->person->id)
-                ->whereNull('mother_id')
-                ->YoungerThan($this->person->birth_year)
-                ->orderBy('firstname')->orderBy('surname')
-                ->get()
-                ->map(fn ($p): array => [
-                    'id'   => $p->id,
-                    'name' => $p->name . ' [' . (($p->sex === 'm') ? __('app.male') : __('app.female')) . '] ' . ($p->birth_formatted ? ' (' . $p->birth_formatted . ')' : ''),
-                ]);
+    public function updatedUploads(): void
+    {
+        if (empty($this->form->uploads)) {
+            return;
         }
+
+        $this->form->uploads = collect(array_merge($this->form->backup, (array) $this->form->uploads))
+            ->unique(fn (UploadedFile $file): string => $file->getClientOriginalName())
+            ->toArray();
     }
 
     public function deleteUpload(array $content): void
@@ -87,120 +74,51 @@ final class Child extends Component
             ]
         */
 
-        if (empty($this->uploads)) {
+        if (empty($this->form->uploads)) {
             return;
         }
 
-        $this->uploads = collect($this->uploads)
+        $this->form->uploads = collect($this->form->uploads)
             ->filter(fn (UploadedFile $file): bool => $file->getFilename() !== $content['temporary_name'])
             ->values()
             ->toArray();
 
         rescue(
-            fn () => UploadedFile::deleteTemporaryFile($content['temporary_name']),
+            fn () => File::delete(storage_path('app/livewire-tmp/' . $content['temporary_name'])),
             report: false
         );
     }
 
-    public function updatingUploads(): void
-    {
-        $this->backup = $this->uploads;
-    }
-
-    public function updatedUploads(): void
-    {
-        if (empty($this->uploads)) {
-            return;
-        }
-
-        $this->uploads = collect(array_merge($this->backup, (array) $this->uploads))
-            ->unique(fn (UploadedFile $file): string => $file->getClientOriginalName())
-            ->toArray();
-    }
-
     public function saveChild(): void
     {
-        if ($this->isDirty()) {
-            $validated = $this->childForm->validate();
+        $validated = $this->validate();
 
-            if (isset($validated['person_id'])) {
-                if ($this->person->sex === 'm') {
-                    Person::findOrFail($validated['person_id'])->update([
-                        'father_id' => $this->person->id,
-                    ]);
+        if (isset($validated['person_id'])) {
+            $child = Person::findOrFail($validated['person_id']);
 
-                    $this->toast()->success(__('app.save'), $this->person->name . ' ' . __('app.saved') . '.')->flash()->send();
-                } else {
-                    Person::findOrFail($validated['person_id'])->update([
-                        'mother_id' => $this->person->id,
-                    ]);
+            $child->update([
+                $this->person->sex === 'm' ? 'father_id' : 'mother_id' => $this->person->id,
+            ]);
 
-                    $this->toast()->success(__('app.save'), $this->person->name . ' ' . __('app.saved') . '.')->flash()->send();
-                }
-            } else {
-                if ($this->person->sex === 'm') {
-                    $new_person = Person::create([
-                        'firstname' => $validated['firstname'],
-                        'surname'   => $validated['surname'],
-                        'birthname' => $validated['birthname'],
-                        'nickname'  => $validated['nickname'],
-                        'sex'       => $validated['sex'],
-                        'gender_id' => $validated['gender_id'] ?? null,
-                        'yob'       => $validated['yob'],
-                        'dob'       => $validated['dob'],
-                        'pob'       => $validated['pob'],
-                        'father_id' => $this->person->id,
-                        'team_id'   => $this->person->team_id,
-                    ]);
-                } else {
-                    $new_person = Person::create([
-                        'firstname' => $validated['firstname'],
-                        'surname'   => $validated['surname'],
-                        'birthname' => $validated['birthname'],
-                        'nickname'  => $validated['nickname'],
-                        'sex'       => $validated['sex'],
-                        'gender_id' => $validated['gender_id'] ?? null,
-                        'yob'       => $validated['yob'],
-                        'dob'       => $validated['dob'],
-                        'pob'       => $validated['pob'],
-                        'mother_id' => $this->person->id,
-                        'team_id'   => $this->person->team_id,
-                    ]);
-                }
+            $this->toast()->success(__('app.save'), __('person.existing_person_linked_as_child'))->flash()->send();
+        } else {
+            $newChild = Person::create(array_merge(
+                collect($validated)->only(['firstname', 'surname', 'birthname', 'nickname', 'sex', 'gender_id', 'yob', 'dob', 'pob'])->toArray(),
+                [
+                    $this->person->sex === 'm' ? 'father_id' : 'mother_id' => $this->person->id,
+                    'team_id'                                              => $this->person->team_id,
+                ]
+            ));
 
-                if ($this->photos) {
-                    $personPhotos = new PersonPhotos($new_person);
-                    $personPhotos->save($this->photos);
-                }
-
-                $this->toast()->success(__('app.create'), $new_person->name . ' ' . __('app.created') . '.')->flash()->send();
+            if ($this->form->uploads) {
+                $photos = new PersonPhotos($newChild);
+                $photos->save($this->form->uploads);
             }
 
-            $this->redirect('/people/' . $this->person->id);
+            $this->toast()->success(__('app.create'), __('person.new_person_linked_as_child'))->flash()->send();
         }
-    }
 
-    public function resetChild(): void
-    {
-        $this->mount();
-    }
-
-    public function isDirty(): bool
-    {
-        return
-        $this->childForm->firstname !== null or
-        $this->childForm->surname !== null or
-        $this->childForm->birthname !== null or
-        $this->childForm->nickname !== null or
-
-        $this->childForm->sex !== null or
-        $this->childForm->gender_id !== null or
-
-        $this->childForm->yob !== null or
-        $this->childForm->dob !== null or
-        $this->childForm->pob !== null or
-
-        $this->childForm->person_id;
+        $this->redirect(route('people.show', $this->person->id));
     }
 
     // -----------------------------------------------------------------------

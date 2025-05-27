@@ -19,9 +19,9 @@ final class Family extends Component
     use TrimStringsAndConvertEmptyStringsToNull;
 
     // -----------------------------------------------------------------------
-    public $person;
+    public Person $person;
 
-    public FamilyForm $familyForm;
+    public FamilyForm $form;
 
     public Collection $fathers;
 
@@ -32,9 +32,7 @@ final class Family extends Component
     // -----------------------------------------------------------------------
     public function mount(): void
     {
-        $this->familyForm->father_id  = $this->person->father_id;
-        $this->familyForm->mother_id  = $this->person->mother_id;
-        $this->familyForm->parents_id = $this->person->parents_id;
+        $this->loadData();
 
         $persons = Person::where('id', '!=', $this->person->id)
             ->OlderThan($this->person->birth_year)
@@ -63,33 +61,26 @@ final class Family extends Component
 
     public function saveFamily(): void
     {
-        if ($this->isDirty()) {
-            $validated = $this->familyForm->validate();
+        $validated = $this->form->validate();
 
-            $this->person->update($validated);
+        $this->person->update($validated);
 
-            $this->toast()->success(__('app.save'), __('app.saved'))->flash()->send();
+        $this->toast()->success(__('app.save'), __('app.saved'))->flash()->send();
 
-            $this->redirect('/people/' . $this->person->id);
-        }
-    }
-
-    public function resetFamily(): void
-    {
-        $this->mount();
-    }
-
-    public function isDirty(): bool
-    {
-        return
-        $this->familyForm->father_id !== $this->person->father_id or
-        $this->familyForm->mother_id !== $this->person->mother_id or
-        $this->familyForm->parents_id !== $this->person->parents_id;
+        $this->redirect('/people/' . $this->person->id);
     }
 
     // ------------------------------------------------------------------------------
     public function render(): View
     {
         return view('livewire.people.edit.family');
+    }
+
+    // ------------------------------------------------------------------------------
+    private function loadData(): void
+    {
+        $this->form->father_id  = $this->person->father_id;
+        $this->form->mother_id  = $this->person->mother_id;
+        $this->form->parents_id = $this->person->parents_id;
     }
 }

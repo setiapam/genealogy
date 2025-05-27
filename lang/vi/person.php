@@ -110,12 +110,15 @@ return [
     'cemetery_location' => 'Vị trí nghĩa trang',
 
     // files
-    'upload_files'     => 'Tải lên tệp',
     'files'            => 'Tệp',
     'files_saved'      => '[0] Không có tệp nào được lưu|[1] Tệp được lưu|[2,*] Tệp được lưu',
     'file'             => 'Tệp',
     'file_deleted'     => 'Tệp đã bị xóa',
-    'update_files_tip' => 'Kéo và thả các tệp mới của bạn vào đây',
+    'upload_files'     => 'Tải lên tệp',
+    'upload_files_tip' => 'Kéo và thả các tệp mới của bạn vào đây ...',
+
+    'upload_accept_types' => 'Cho phép : :types',
+    'upload_max_size'     => 'Kích thước tối đa : :max KB',
 
     // Photo
     'avatar'            => 'Ảnh đại diện',
@@ -127,7 +130,7 @@ return [
     'photos_existing'   => 'Ảnh hiện có',
     'set_primary'       => 'Đặt làm chính',
     'upload_photos'     => 'Tải lên ảnh',
-    'update_photos_tip' => 'Kéo và thả các ảnh mới của bạn vào đây',
+    'upload_photos_tip' => 'Kéo và thả các ảnh mới của bạn vào đây ...',
 
     // Messages
     'yod_not_matching_dod' => 'Năm mất phải khớp với ngày mất (:value).',
@@ -148,4 +151,16 @@ return [
 
     'not_found' => 'Không tìm thấy người',
     'use_tab'   => 'Sử dụng tab',
+
+    'existing_person_linked_as_father'  => 'Người hiện có được liên kết là cha.',
+    'new_person_linked_as_father'       => 'Người mới được liên kết là cha.',
+    'existing_person_linked_as_mother'  => 'Người hiện có được liên kết là mẹ.',
+    'new_person_linked_as_mother'       => 'Người mới được liên kết là mẹ.',
+    'existing_person_linked_as_child'   => 'Người hiện có được liên kết là con.',
+    'new_person_linked_as_child'        => 'Người mới được liên kết là con.',
+    'existing_person_linked_as_partner' => 'Người hiện có được liên kết là bạn đời.',
+    'new_person_linked_as_parther'      => 'Người mới được liên kết là bạn đời.',
+
+    'family_caution_1' => 'Cha và Mẹ chỉ nên dùng cho cha mẹ ruột và do đó phải khác giới.',
+    'family_caution_2' => 'Cha mẹ có thể là cha mẹ ruột, nhưng cũng có thể là cha mẹ không ruột thịt (đồng giới hoặc nhận nuôi). Trong trường hợp đó, chỉ cần để trống Cha và Mẹ.',
 ];

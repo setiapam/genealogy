@@ -4,6 +4,8 @@
 
 <x-app-layout>
     <x-slot name="heading">
+        {{ $person->name }}
+        <x-ts-icon icon="tabler.arrow-right-circle" class="inline-block size-5" alt="Arrow Icon" />
         {{ __('person.edit_contact') }}
     </x-slot>
 

@@ -110,12 +110,15 @@ return [
     'cemetery_location' => 'Ort des Friedhofs',
 
     // Files
-    'upload_files'     => 'Dateien hochladen',
     'files'            => 'Dateien',
     'files_saved'      => '[0] Keine Dateien gespeicherd|[1] Datei gespeicherd|[2,*] Dateien gespeicherd',
     'file'             => 'Datei gelöscht',
     'file_deleted'     => 'Datei',
-    'update_files_tip' => 'Ziehen Sie Ihr neue Dateien hierher',
+    'upload_files'     => 'Dateien hochladen',
+    'upload_files_tip' => 'Ziehen Sie Ihr neue Dateien hierher ...',
+
+    'upload_accept_types' => 'Erlaubt : :types',
+    'upload_max_size'     => 'Maximale Größe : :max KB',
 
     // Photo
     'avatar'            => 'Benutzerbild',
@@ -127,7 +130,7 @@ return [
     'photos_existing'   => 'Bestehende Fotos',
     'set_primary'       => 'Als Hauptfoto einstellen',
     'upload_photos'     => 'Fotos hochladen',
-    'update_photos_tip' => 'Ziehen Sie Ihr neue Fotos hierher',
+    'upload_photos_tip' => 'Ziehen Sie Ihr neue Fotos hierher ...',
 
     // Messages
     'yod_not_matching_dod' => 'Das Sterbejahr muss übereinstimmen mit dem Sterbedatum (:value).',
@@ -148,4 +151,16 @@ return [
 
     'not_found' => 'Person nicht gefunden',
     'use_tab'   => 'Benutze tab',
+
+    'existing_person_linked_as_father'  => 'Vorhandene Person als Vater verknüpft.',
+    'new_person_linked_as_father'       => 'Neue Person als Vater verknüpft.',
+    'existing_person_linked_as_mother'  => 'Vorhandene Person als Mutter verknüpft.',
+    'new_person_linked_as_mother'       => 'Neue Person als Mutter verknüpft.',
+    'existing_person_linked_as_child'   => 'Vorhandene Person als Kind verknüpft.',
+    'new_person_linked_as_child'        => 'Neue Person als Kind verknüpft.',
+    'existing_person_linked_as_partner' => 'Vorhandene Person als Partner verknüpft.',
+    'new_person_linked_as_parther'      => 'Neue Person als Partner verknüpft.',
+
+    'family_caution_1' => 'Vater und Mutter dürfen nur für die biologischen Eltern verwendet werden und müssen daher unterschiedlichen Geschlechts sein.',
+    'family_caution_2' => 'Eltern können die biologischen Eltern sein, aber auch nicht-biologische (gleichgeschlechtliche oder Adoptiveltern). In diesem Fall lassen Sie Vater und Mutter einfach leer.',
 ];

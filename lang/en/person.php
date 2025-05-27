@@ -110,12 +110,15 @@ return [
     'cemetery_location' => 'Cemetery Location',
 
     // files
-    'upload_files'     => 'Upload files',
     'files'            => 'Files',
     'files_saved'      => '[0] No files saved|[1] File saved|[2,*] Files saved',
     'file'             => 'File',
     'file_deleted'     => 'File deleted',
-    'update_files_tip' => 'Drag and drop your new files here',
+    'upload_files'     => 'Upload files',
+    'upload_files_tip' => 'Drag and drop your new files here ...',
+
+    'upload_accept_types' => 'Allowed : :types',
+    'upload_max_size'     => 'Maximum size : :max KB',
 
     // Photo
     'avatar'            => 'Avatar',
@@ -127,7 +130,7 @@ return [
     'photos_existing'   => 'Existing photos',
     'set_primary'       => 'Set as primary',
     'upload_photos'     => 'Upload photos',
-    'update_photos_tip' => 'Drag and drop your new photos here',
+    'upload_photos_tip' => 'Drag and drop your new photos here ...',
 
     // Messages
     'yod_not_matching_dod' => 'The Year of death must match the Date of death (:value).',
@@ -148,4 +151,16 @@ return [
 
     'not_found' => 'Person not found',
     'use_tab'   => 'Use tab',
+
+    'existing_person_linked_as_father'  => 'Existing person linked as father.',
+    'new_person_linked_as_father'       => 'New person linked as father.',
+    'existing_person_linked_as_mother'  => 'Existing person linked as mother.',
+    'new_person_linked_as_mother'       => 'New person linked as mother.',
+    'existing_person_linked_as_child'   => 'Existing person linked as child.',
+    'new_person_linked_as_child'        => 'New person linked as child.',
+    'existing_person_linked_as_partner' => 'Existing person linked as partner.',
+    'new_person_linked_as_parther'      => 'New person linked as parter.',
+
+    'family_caution_1' => 'Father and Mother may only be used for the biological parents and must therefore be of opposite sex.',
+    'family_caution_2' => 'Parents may be the biological parents, but may also be used for non-biological parents (gay or adoptive). In the latter case, simply leave Father and Mother blank.',
 ];
