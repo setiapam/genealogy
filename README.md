@@ -231,6 +231,7 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
     <li>English (EN)</li>
     <li>Spanish (ES)</li>
     <li>French (FR)</li>
+    <li>Indonesian (ID)</li>
     <li>Dutch (NL)</li>
     <li>Portuguese (PT)</li>
     <li>Turkish (TR)</li>
@@ -239,10 +240,9 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
 </ul>
 
 Translations can be added by submitting a <b>Pull Request</b> to the project.
-Translation integrity can be checked by issuing the command<br/>
-`php artisan translations:check --excludedDirectories=vendor`
+Translation integrity can be checked by issuing the command `php artisan translations:check --excludedDirectories=vendor`
 
-Instructions on how to add a language to your own project clone can be found in <a href="https://github.com/MGeurts/genealogy/blob/main/README-LANGUAGES.md" target="_blank">README-LANGUAGES.md</a>.
+Instructions on how to add a language can be found in <a href="https://github.com/MGeurts/genealogy/blob/main/README-LANGUAGES.md" target="_blank">README-LANGUAGES.md</a>.
 
 ## Uploads
 
@@ -302,10 +302,6 @@ Visit the <a href="https://genealogy.kreaweb.be/help" target="_blank">demo proje
 If you like this project, please consider giving it a star and spread the word. Thank you.
 
 ## Impressum
-
-### Basic idea (2017)
-
-This application is based on an original idea by <a href="https://github.com/nafiesl/silsilah" target="_blank">Nafies Luthfi</a>. Thanks for your excellent work.
 
 ### Design & Development (2024)
 
