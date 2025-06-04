@@ -19,6 +19,11 @@ final class Couple extends Model
 {
     use LogsActivity;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'person1_id',
         'person2_id',
@@ -29,7 +34,11 @@ final class Couple extends Model
         'team_id',
     ];
 
-    // Use the built-in $casts property for automatic casting
+    /**
+     * Use the built-in $casts property for automatic casting.
+     *
+     * @var array<int, string>
+     */
     protected $casts = [
         'date_start' => 'date:Y-m-d',
         'date_end'   => 'date:Y-m-d',
@@ -37,8 +46,14 @@ final class Couple extends Model
         'has_ended'  => 'boolean',
     ];
 
-    // Appending custom attributes
-    protected $appends = ['name'];
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'name',
+    ];
 
     /* -------------------------------------------------------------------------------------------- */
     // Log activities
@@ -70,23 +85,23 @@ final class Couple extends Model
     // Local Scopes
     /* -------------------------------------------------------------------------------------------- */
     #[Scope]
-    public function scopeOlderThan(Builder $query, ?string $birth_year = null): void
+    public function scopeYoungerThan(Builder $query, ?string $year = null): void
     {
-        if ($birth_year) {
-            $query->where(function ($q) use ($birth_year): void {
+        if ($year) {
+            $query->where(function ($q) use ($year): void {
                 $q->whereNull('date_start')
-                    ->orWhereYear('date_start', '<=', $birth_year);
+                    ->orWhereYear('date_start', '>=', $year);
             });
         }
     }
 
     #[Scope]
-    public function scopeYoungerThan(Builder $query, ?string $birth_year = null): void
+    public function scopeOlderThan(Builder $query, ?string $year = null): void
     {
-        if ($birth_year) {
-            $query->where(function ($q) use ($birth_year): void {
+        if ($year) {
+            $query->where(function ($q) use ($year): void {
                 $q->whereNull('date_start')
-                    ->orWhereYear('date_start', '>=', $birth_year);
+                    ->orWhereYear('date_start', '<=', $year);
             });
         }
     }

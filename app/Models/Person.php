@@ -7,8 +7,10 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Countries;
 use Carbon\Carbon;
+use FilesystemIterator;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,7 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Korridor\LaravelHasManyMerged\HasManyMerged;
 use Korridor\LaravelHasManyMerged\HasManyMergedRelation;
 use Override;
@@ -28,11 +29,17 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 final class Person extends Model implements HasMedia
 {
+    use HasFactory;
     use HasManyMergedRelation;
     use InteractsWithMedia;
     use LogsActivity;
     use SoftDeletes;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'firstname',
         'surname',
@@ -62,6 +69,21 @@ final class Person extends Model implements HasMedia
         'team_id',
     ];
 
+    /**
+     * Use the built-in $casts property for automatic casting.
+     *
+     * @var array<int, string>
+     */
+    protected $casts = [
+        'dob' => 'date:Y-m-d',
+        'dod' => 'date:Y-m-d',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
     protected $appends = [
         'name',
     ];
@@ -112,15 +134,17 @@ final class Person extends Model implements HasMedia
     }
 
     /* -------------------------------------------------------------------------------------------- */
-    // Scopes (local)
-    // The system wil look up every word in the search value in the attributes surname, firstname, birthname and nickname
-    // Begin the search string with % if you want to search parts of names, for instance %Jr.
-    // Be aware that this kinds of searches are slower.
-    // If a name containes any spaces, enclose the name in double quoutes, for instance "John Jr." Kennedy.
+    // Local Scopes
     /* -------------------------------------------------------------------------------------------- */
     #[Scope]
     public function scopeSearch(Builder $query, string $searchString): void
     {
+        /* -------------------------------------------------------------------------------------------- */
+        // The system wil look up every word in the search value in the attributes surname, firstname, birthname and nickname
+        // Begin the search string with % if you want to search parts of names, for instance %Jr.
+        // Be aware that this kinds of searches are slower.
+        // If a name containes any spaces, enclose the name in double quoutes, for instance "John Jr." Kennedy.
+        /* -------------------------------------------------------------------------------------------- */
         if ($searchString !== '%') {
             collect(str_getcsv($searchString, ' ', '"'))->filter()->each(function (string $searchTerm) use ($query): void {
                 $query->whereAny(['firstname', 'surname', 'birthname', 'nickname'], 'like', $searchTerm . '%');
@@ -129,58 +153,61 @@ final class Person extends Model implements HasMedia
     }
 
     #[Scope]
-    public function scopeOlderThan(Builder $query, ?string $birth_year): void
+    public function scopeYoungerThan(Builder $query, ?string $year): void
     {
-        if ($birth_year !== null) {
-            $birth_year = (int) $birth_year;
+        if ($year !== null) {
+            $year = (int) $year;
 
             $query
-                ->where(function ($q) use ($birth_year): void {
-                    $q->whereNull('dob')->orWhere(DB::raw('YEAR(dob)'), '<=', $birth_year);
+                ->where(function ($q) use ($year): void {
+                    $q->whereNull('dob')->orWhere(DB::raw('YEAR(dob)'), '>=', $year);
                 })
-                ->where(function ($q) use ($birth_year): void {
-                    $q->whereNull('yob')->orWhere('yob', '<=', $birth_year);
+                ->where(function ($q) use ($year): void {
+                    $q->whereNull('yob')->orWhere('yob', '>=', $year);
                 });
         }
     }
 
     #[Scope]
-    public function scopeYoungerThan(Builder $query, ?string $birth_year): void
+    public function scopeOlderThan(Builder $query, ?string $year): void
     {
-        if ($birth_year !== null) {
-            $birth_year = (int) $birth_year;
+        if ($year !== null) {
+            $year = (int) $year;
 
             $query
-                ->where(function ($q) use ($birth_year): void {
-                    $q->whereNull('dob')->orWhere(DB::raw('YEAR(dob)'), '>=', $birth_year);
+                ->where(function ($q) use ($year): void {
+                    $q->whereNull('dob')->orWhere(DB::raw('YEAR(dob)'), '<=', $year);
                 })
-                ->where(function ($q) use ($birth_year): void {
-                    $q->whereNull('yob')->orWhere('yob', '>=', $birth_year);
+                ->where(function ($q) use ($year): void {
+                    $q->whereNull('yob')->orWhere('yob', '<=', $year);
                 });
         }
     }
 
     #[Scope]
-    public function scopePartnerOffset(Builder $query, ?string $birth_year, int $offset = 40): void
+    public function scopePartnerOffset(Builder $query, ?string $year, int $offset = 40): void
     {
         // ------------------------------------------------------------------------
         // offset : possible partners can be +/- n ($offset) years older or younger
         // ------------------------------------------------------------------------
-        if ($birth_year !== null) {
-            $birth_year = (int) $birth_year;
-            $min_age    = $birth_year - $offset;
-            $max_age    = $birth_year + $offset;
+        if ($year !== null) {
+            $year     = (int) $year;
+            $min_year = $year - $offset;
+            $max_year = $year + $offset;
 
             $query
-                ->where(function ($q) use ($min_age, $max_age): void {
-                    $q->whereNull('dob')->orWhereBetween(DB::raw('YEAR(dob)'), [$min_age, $max_age]);
+                ->where(function ($q) use ($min_year, $max_year): void {
+                    $q->whereNull('dob')->orWhereBetween(DB::raw('YEAR(dob)'), [$min_year, $max_year]);
                 })
-                ->where(function ($q) use ($min_age, $max_age): void {
-                    $q->whereNull('yob')->orWhereBetween('yob', [$min_age, $max_age]);
+                ->where(function ($q) use ($min_year, $max_year): void {
+                    $q->whereNull('yob')->orWhereBetween('yob', [$min_year, $max_year]);
                 });
         }
     }
 
+    /* -------------------------------------------------------------------------------------------- */
+    // Counters and checks
+    /* -------------------------------------------------------------------------------------------- */
     public function countFiles(): int
     {
         return $this->getMedia('files') ? $this->getMedia('files')->count() : 0;
@@ -192,15 +219,18 @@ final class Person extends Model implements HasMedia
         $directory = public_path('storage/photos/' . $this->team_id);
 
         // Check if the directory exists
-        if (! File::exists($directory)) {
+        if (! is_dir($directory)) {
             return 0;
         }
 
-        // Get all files matching the pattern
-        $files = File::glob($directory . '/' . $this->id . '_*.webp');
+        $count = 0;
+        foreach (new FilesystemIterator($directory, FilesystemIterator::SKIP_DOTS) as $file) {
+            if ($file->isFile() && str_starts_with($file->getFilename(), "{$this->id}_") && str_ends_with($file->getFilename(), '.webp')) {
+                $count++;
+            }
+        }
 
-        // Count and return the number of matching files
-        return count($files);
+        return $count;
     }
 
     public function isDeceased(): bool
@@ -414,14 +444,6 @@ final class Person extends Model implements HasMedia
         });
     }
 
-    protected function casts(): array
-    {
-        return [
-            'dob' => 'date:Y-m-d',
-            'dod' => 'date:Y-m-d',
-        ];
-    }
-
     /* -------------------------------------------------------------------------------------------- */
     // Accessors & Mutators
     /* -------------------------------------------------------------------------------------------- */
@@ -460,7 +482,7 @@ final class Person extends Model implements HasMedia
             $age = null;
         }
 
-        return $age > 0 ? $age : null;
+        return $age >= 0 ? $age : null;
     }
 
     protected function getNextBirthdayAttribute(): ?Carbon
@@ -544,6 +566,19 @@ final class Person extends Model implements HasMedia
         return (string) $year;
     }
 
+    protected function getDeathYearAttribute(): ?string
+    {
+        if ($this->dod) {
+            $year = Carbon::parse($this->dod)->format('Y');
+        } elseif ($this->yod) {
+            $year = $this->yod;
+        } else {
+            $year = null;
+        }
+
+        return (string) $year;
+    }
+
     protected function getBirthFormattedAttribute(): ?string
     {
         if ($this->dob) {
@@ -587,9 +622,6 @@ final class Person extends Model implements HasMedia
         return $address ?: null;
     }
 
-    /**
-     * Get the full Google Maps address URL.
-     */
     protected function getAddressGoogleAttribute(): ?string
     {
         $countries         = new Countries(app()->getLocale());

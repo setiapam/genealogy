@@ -231,6 +231,7 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
     <li>English (EN)</li>
     <li>Spanish (ES)</li>
     <li>French (FR)</li>
+    <li>Hindi</li>
     <li>Indonesian (ID)</li>
     <li>Dutch (NL)</li>
     <li>Portuguese (PT)</li>
@@ -239,7 +240,7 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
     <li>Simplified Chinese (ZH_CN)</li>
 </ul>
 
-Translations can be added by submitting a <b>Pull Request</b> to the project.
+Translations can be added by submitting a <b>Pull Request</b> to the project.<br />
 Translation integrity can be checked by issuing the command `php artisan translations:check --excludedDirectories=vendor`
 
 Instructions on how to add a language can be found in <a href="https://github.com/MGeurts/genealogy/blob/main/README-LANGUAGES.md" target="_blank">README-LANGUAGES.md</a>.
@@ -286,6 +287,12 @@ Update instructions can be found in <a href="https://github.com/MGeurts/genealog
 
 ## Testing
 
+Testing is done using <a href="https://pestphp.com/">Pest</a>.<br/>
+
+Production data should be stored in a MySQL or MariaDB database configured in `.env`.<br /><br />
+Testing data is stored in <b>memory</b> and should therefore not interfere with the production database.
+But, <b>to be fully safe</b>, always backup your production database before testing.
+
 `php artisan test`
 
 ## Contributing
@@ -297,7 +304,7 @@ Feel free to submit <b>Issues</b> or <b>Pull Requests</b>, for bugs, suggestions
 The documentation is included in the applications help.
 Visit the <a href="https://genealogy.kreaweb.be/help" target="_blank">demo project</a> to read the documentation.
 
-### Sponsoring
+## Sponsoring
 
 If you like this project, please consider giving it a star and spread the word. Thank you.
 
