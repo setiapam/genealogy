@@ -111,4 +111,17 @@ return [
 
     'under_construction' => 'Em construção',
     'demonstration'      => 'Demonstração',
+
+    'password_generator'   => 'Gerador de Senhas',
+    'password_length'      => 'Comprimento da senha',
+    'use_numbers'          => 'Usar números',
+    'use_symbols'          => 'Usar símbolos',
+    'generate'             => 'Gerar',
+    'copy_to_clipboard'    => 'Copiar para a área de transferência',
+    'copied_to_clipboard'  => 'Copiado para a área de transferência!',
+    'password_very_weak'   => 'Muito fraca',
+    'password_weak'        => 'Fraca',
+    'password_moderate'    => 'Moderada',
+    'password_strong'      => 'Forte',
+    'password_very_strong' => 'Muito forte',
 ];

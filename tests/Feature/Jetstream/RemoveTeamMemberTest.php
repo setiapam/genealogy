@@ -1,13 +1,14 @@
 <?php
 
 declare(strict_types=1);
+
 use App\Models\User;
 use Laravel\Jetstream\Http\Livewire\TeamMemberManager;
 use Livewire\Livewire;
 
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-test('team members can be removed from teams', function () {
+test('team members can be removed from teams', function (): void {
     $this->actingAs($user = User::factory()->withPersonalTeam()->create());
 
     $user->currentTeam->users()->attach(
@@ -20,7 +21,8 @@ test('team members can be removed from teams', function () {
 
     expect($user->currentTeam->fresh()->users)->toHaveCount(0);
 });
-test('only team owner can remove team members', function () {
+
+test('only team owner can remove team members', function (): void {
     $user = User::factory()->withPersonalTeam()->create();
 
     $user->currentTeam->users()->attach(

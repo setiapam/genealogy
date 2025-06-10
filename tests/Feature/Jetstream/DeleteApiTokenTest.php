@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 use App\Models\User;
 use Illuminate\Support\Str;
 use Laravel\Jetstream\Features;
@@ -9,7 +10,7 @@ use Livewire\Livewire;
 
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-test('api tokens can be deleted', function () {
+test('api tokens can be deleted', function (): void {
     if (! Features::hasApiFeatures()) {
         $this->markTestSkipped('API support is not enabled.');
     }

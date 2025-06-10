@@ -136,4 +136,17 @@ return [
 
     'under_construction' => 'Đang xây dựng',
     'demonstration'      => 'Cuộc biểu tình',
+
+    'password_generator'   => 'Trình tạo mật khẩu',
+    'password_length'      => 'Độ dài mật khẩu',
+    'use_numbers'          => 'Sử dụng số',
+    'use_symbols'          => 'Sử dụng ký hiệu',
+    'generate'             => 'Tạo',
+    'copy_to_clipboard'    => 'Sao chép vào bảng tạm',
+    'copied_to_clipboard'  => 'Đã sao chép vào bảng tạm!',
+    'password_very_weak'   => 'Rất yếu',
+    'password_weak'        => 'Yếu',
+    'password_moderate'    => 'Trung bình',
+    'password_strong'      => 'Mạnh',
+    'password_very_strong' => 'Rất mạnh',
 ];

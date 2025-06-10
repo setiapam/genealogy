@@ -1,13 +1,14 @@
 <?php
 
 declare(strict_types=1);
+
 use App\Livewire\People\Add\Person as AddPerson;
 use App\Models\User;
 use Livewire\Livewire;
 
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-test('authenticated user can create a person', function () {
+test('authenticated user can create a person', function (): void {
     $user = User::factory()->withPersonalTeam()->create();
 
     Livewire::actingAs($user)
@@ -27,7 +28,8 @@ test('authenticated user can create a person', function () {
         'team_id'   => $user->currentTeam->id,
     ]);
 });
-test('validation errors when required fields are missing', function () {
+
+test('validation errors when required fields are missing', function (): void {
     $user = User::factory()->withPersonalTeam()->create();
 
     $this->actingAs($user);

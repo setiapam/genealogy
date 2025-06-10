@@ -136,4 +136,17 @@ return [
 
     'under_construction' => 'In opbouw',
     'demonstration'      => 'Demonstratie',
+
+    'password_generator'   => 'Wachtwoordgenerator',
+    'password_length'      => 'Wachtwoordlengte',
+    'use_numbers'          => 'Gebruik cijfers',
+    'use_symbols'          => 'Gebruik symbolen',
+    'generate'             => 'Genereren',
+    'copy_to_clipboard'    => 'Kopiëren naar klembord',
+    'copied_to_clipboard'  => 'Gekopieerd naar klembord!',
+    'password_very_weak'   => 'Zeer zwak',
+    'password_weak'        => 'Zwak',
+    'password_moderate'    => 'Matig',
+    'password_strong'      => 'Sterk',
+    'password_very_strong' => 'Zeer sterk',
 ];
