@@ -7,6 +7,7 @@ namespace App\Livewire\People\Edit;
 use App\Livewire\Traits\TrimStringsAndConvertEmptyStringsToNull;
 use App\Models\Couple;
 use App\Models\Person;
+use App\Rules\ParentsIdExclusive;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -81,26 +82,30 @@ final class Family extends Component
     }
 
     // -----------------------------------------------------------------------
-    public function rules(): array
+    protected function rules(): array
     {
         return $rules = [
             'father_id'  => ['nullable', 'integer'],
             'mother_id'  => ['nullable', 'integer'],
-            'parents_id' => ['nullable', 'integer'],
+            'parents_id' => [
+                'nullable',
+                'integer',
+                new ParentsIdExclusive($this->father_id, $this->mother_id),
+            ],
         ];
     }
 
-    public function messages(): array
+    protected function messages(): array
     {
         return [];
     }
 
-    public function validationAttributes(): array
+    protected function validationAttributes(): array
     {
         return [
             'father_id'  => __('person.father'),
             'mother_id'  => __('person.mother'),
-            'parents_id' => __('parents.father'),
+            'parents_id' => __('person.parents'),
         ];
     }
 

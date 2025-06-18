@@ -9,12 +9,12 @@
 
     <x-dynamic-component :component="$component" href="#" x-on:click.prevent="$root.submit();">
         <div class="flex items-center">
-            <div class="truncate @if (Auth()->user()->isCurrentTeam($team)) text-yellow-500 @endif" title="{{ $team->description }}">
+            <div class="truncate @if (auth()->user()->isCurrentTeam($team)) text-yellow-500 @endif" title="{{ $team->description }}">
                 {{ $team->name }}
             </div>
 
-            @if (Auth()->user()->isCurrentTeam($team))
-                <x-ts-icon icon="tabler.circle-check" class="size-5 ms-2 text-emerald-600" />
+            @if (auth()->user()->isCurrentTeam($team))
+                <x-ts-icon icon="tabler.circle-check" class="inline-block size-5 ms-2 text-emerald-600" />
             @endif
         </div>
     </x-dynamic-component>

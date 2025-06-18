@@ -1,4 +1,4 @@
-<x-form-section submit="exportteam">
+<x-form-section submit="exportTeam">
     <x-slot name="title">
         <div class="dark:text-gray-400">
             {{ __('gedcom.export') }}
@@ -50,7 +50,7 @@
 
         {{-- filename --}}
         <div class="col-span-6">
-            <x-ts-input id="filename" type="text" class="block w-full mt-1" wire:model="filename" label="{{ __('gedcom.filename') }} :" required />
+            <x-ts-input id="filename" type="text" class="block w-full mt-1" wire:model="filename" label="{{ __('gedcom.filename') }} : *" required />
         </div>
 
         {{-- format --}}
@@ -81,7 +81,7 @@
 
     <x-slot name="actions">
         <x-ts-button type="submit" color="primary">
-            <x-ts-icon icon="tabler.download" class="inline-block" />
+            <x-ts-icon icon="tabler.download" class="inline-block size-5" />
             {{ __('app.download') }}
         </x-ts-button>
     </x-slot>

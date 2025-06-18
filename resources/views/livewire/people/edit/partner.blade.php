@@ -10,7 +10,7 @@
                     </div>
 
                     <div class="flex-1 grow max-w-full min-w-max text-end">
-                        <x-ts-icon icon="tabler.user-edit" class="inline-block" />
+                        <x-ts-icon icon="tabler.user-edit" class="inline-block size-5" />
                     </div>
                 </div>
             </div>
@@ -54,7 +54,7 @@
         </div>
     </form>
 
-    @if (Auth()->user()->currentTeam->personal_team)
+    @if (auth()->user()->currentTeam->personal_team)
         @include('livewire.people.partials.caution-personal-team')
     @endif
 </div>

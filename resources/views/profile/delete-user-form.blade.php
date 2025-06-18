@@ -21,7 +21,7 @@
                 ['index' => 'personal', 'label' => __('team.team_personal') . '?'],
             ];
 
-            $rows = collect(Auth()->user()->teamsStatistics())
+            $rows = collect(auth()->user()->teamsStatistics())
                 ->map(function ($team) {
                     return [
                         'team' => $team->name,
@@ -37,14 +37,14 @@
         <x-ts-table :$headers :$rows striped>
             @interact('column_personal', $row)
                 @if ($row['personal'])
-                    <x-ts-icon icon="tabler.circle-check" class="size-5 text-emerald-600" />
+                    <x-ts-icon icon="tabler.circle-check" class="inline-block size-5 text-emerald-600" />
                 @endif
             @endinteract
         </x-ts-table>
 
         <x-hr.normal />
 
-        @if (Auth()->user()->isDeletable())
+        @if (auth()->user()->isDeletable())
             <div class="max-w-xl text-sm text-gray-600 dark:text-gray-400">
                 {{ __('user.once_deleted') }}
             </div>

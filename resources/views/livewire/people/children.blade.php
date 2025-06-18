@@ -8,24 +8,24 @@
                 @endif
             </div>
 
-            @if (Auth()->user()->hasPermission('person:create'))
+            @if (auth()->user()->hasPermission('person:create'))
                 <div class="flex-1 grow min-w-max max-w-min text-end">
                     <x-ts-dropdown icon="tabler.menu-2" position="bottom-end">
                         <a href="/people/{{ $person->id }}/add-child">
                             <x-ts-dropdown.items>
-                                <x-ts-icon icon="tabler.user-plus" class="mr-2" />
+                                <x-ts-icon icon="tabler.user-plus" class="inline-block size-5 mr-2" />
                                 {{ __('person.add_child') }}
                             </x-ts-dropdown.items>
                         </a>
 
-                        @if (Auth()->user()->hasPermission('person:update') and $person->children->count() > 0)
+                        @if (auth()->user()->hasPermission('person:update') and $person->children->count() > 0)
                             <hr />
 
                             @foreach ($children as $child)
                                 @if (!isset($child->type))
                                     <x-ts-dropdown.items class="text-red-600! dark:text-red-400!" wire:click="confirm({{ $child->id }})"
                                         title="{{ __('person.delete_child') }}">
-                                        <x-ts-icon icon="tabler.plug-connected-x" class="mr-2" /> {{ $child->name }}
+                                        <x-ts-icon icon="tabler.plug-connected-x" class="inline-block size-5 mr-2" /> {{ $child->name }}
                                     </x-ts-dropdown.items>
                                 @endif
                             @endforeach
@@ -44,9 +44,9 @@
                         {{ $child->name }}
                     </x-link>
 
-                    <x-ts-icon icon="tabler.{{ $child->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block" />
+                    <x-ts-icon icon="tabler.{{ $child->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
                     @if (isset($child->type))
-                        <x-ts-icon icon="tabler.heart-plus" class="inline-block text-emerald-600" />
+                        <x-ts-icon icon="tabler.heart-plus" class="inline-block size-5 text-emerald-600" />
                     @endif
                 </div>
             </div>
