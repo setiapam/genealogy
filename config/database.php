@@ -39,6 +39,9 @@ return [
             'database'                => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix'                  => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+            'busy_timeout'            => null,
+            'journal_mode'            => null,
+            'synchronous'             => null,
         ],
 
         'mysql' => [
@@ -55,9 +58,11 @@ return [
             'prefix'         => '',
             'prefix_indexes' => true,
             'strict'         => true,
-            'engine'         => null,
+            'engine'         => 'InnoDB',
             'options'        => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_EMULATE_PREPARES         => false,                            // Use native prepared statements
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,                             // Useful for large SELECTs
+                PDO::MYSQL_ATTR_SSL_CA             => env('MYSQL_ATTR_SSL_CA'),    // Optional SSL
             ]) : [],
             'dump' => [
                 'dump_binary_path' => env('BACKUP_DUMP_PATH', null), // only the path, so without `mysqldump` or `pg_dump`
@@ -82,9 +87,11 @@ return [
             'prefix'         => '',
             'prefix_indexes' => true,
             'strict'         => true,
-            'engine'         => null,
+            'engine'         => 'InnoDB',
             'options'        => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_EMULATE_PREPARES         => false,                                     // Native prepares: faster + safer
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,                                      // Useful for read-heavy apps
+                PDO::MYSQL_ATTR_SSL_CA             => env('MYSQL_ATTR_SSL_CA'),             // If using SSL
             ]) : [],
         ],
 

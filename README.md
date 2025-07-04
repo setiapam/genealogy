@@ -10,6 +10,9 @@
 
 ![Latest Stable Version](https://img.shields.io/github/release/MGeurts/genealogy)
 
+[![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg?logo=paypal)](https://www.paypal.me/MGeurtsKREAWEB)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange.svg?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/MGeurts)
+
 ## About this project
 
 <b>Genealogy</b> is a free and open-source family tree PHP application to record family members and their relationships, build with Laravel 12.
@@ -291,11 +294,10 @@ Update instructions can be found in <a href="https://github.com/MGeurts/genealog
 
 Testing is done using <a href="https://pestphp.com/">Pest</a>.<br/>
 
-Production data should be stored in a MySQL or MariaDB database configured in `.env`.<br /><br />
-Testing data is stored in <b>memory</b> and should therefore not interfere with the production database.
-But, <b>to be fully safe</b>, always backup your production database before testing.
+Command: `php artisan test` or `./vendor/bin/pest`<br/>
 
-`php artisan test`
+<b>Production (or local development) data</b> should be stored in a MySQL or MariaDB database configured in `.env`.<br /><br />
+<b>Testing data</b> should be stored in a separate MySQL or MariaDB database configured in `.env.testing` to avoid interfering with the production or development data.
 
 ## Contributing
 
@@ -306,9 +308,14 @@ Feel free to submit <b>Issues</b> or <b>Pull Requests</b>, for bugs, suggestions
 The documentation is included in the applications help.
 Visit the <a href="https://genealogy.kreaweb.be/help" target="_blank">demo project</a> to read the documentation.
 
-## Sponsoring
+## 💖 Support This Project
 
-If you like this project, please consider giving it a star and spread the word. Thank you.
+Maintaining this project takes time and effort. If you find it useful, consider supporting me:
+
+-   [![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/MGeurtsKREAWEB)
+-   [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/MGeurts)
+
+> Your support helps me improve and maintain [Genealogy](https://github.com/MGeurts/genealogy) and other open-source tools. Every bit is appreciated. Thank you! 🙏
 
 ## Impressum
 

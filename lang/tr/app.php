@@ -35,6 +35,7 @@ return [
     'search'            => 'Ara',
     'yes'               => 'Evet',
     'no'                => 'Hayır',
+    'error'             => 'Hata',
 
     'created_at' => 'Oluşturulma Tarihi',
     'updated_at' => 'Güncellenme Tarihi',
@@ -149,4 +150,5 @@ return [
     'password_moderate'    => 'Orta',
     'password_strong'      => 'Güçlü',
     'password_very_strong' => 'Çok güçlü',
+    'check_breach'         => 'E-posta adresinizin bir veri ihlalinde yer alıp almadığını kontrol edin',
 ];

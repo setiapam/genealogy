@@ -35,6 +35,7 @@ return [
     'search'            => 'Cari',
     'yes'               => 'Ya',
     'no'                => 'Tidak',
+    'error'             => 'Kesalahan',
 
     'created_at' => 'Dibuat pada',
     'updated_at' => 'Diperbarui pada',
@@ -149,4 +150,5 @@ return [
     'password_moderate'    => 'Sedang',
     'password_strong'      => 'Kuat',
     'password_very_strong' => 'Sangat kuat',
+    'check_breach'         => 'Periksa apakah alamat email Anda ada dalam pelanggaran data',
 ];

@@ -35,6 +35,7 @@ return [
     'search'            => 'Zoek',
     'yes'               => 'Ja',
     'no'                => 'Neen',
+    'error'             => 'Fout',
 
     'created_at' => 'Aangemaakt op',
     'updated_at' => 'Gewijzigd op',
@@ -149,4 +150,5 @@ return [
     'password_moderate'    => 'Matig',
     'password_strong'      => 'Sterk',
     'password_very_strong' => 'Zeer sterk',
+    'check_breach'         => 'Controleer of je e-mailadres in een datalek voorkomt',
 ];

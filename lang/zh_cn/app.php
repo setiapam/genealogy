@@ -35,6 +35,7 @@ return [
     'search'            => '搜索',
     'yes'               => '同意',
     'no'                => '拒绝',
+    'error'             => '错误',
 
     'created_at' => '添加',
     'updated_at' => '更新',
@@ -149,4 +150,5 @@ return [
     'password_moderate'    => '中等',
     'password_strong'      => '强',
     'password_very_strong' => '非常强',
+    'check_breach'         => '检查您的电子邮件地址是否出现在数据泄露中',
 ];

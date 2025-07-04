@@ -32,6 +32,7 @@ return [
     'search'                    => 'Procurar',
     'yes'                       => 'Sim',
     'no'                        => 'Não',
+    'error'                     => 'Erro',
     'created_at'                => 'Criado em',
     'updated_at'                => 'Atualizado em',
     'deleted_at'                => 'Excluído em',
@@ -124,4 +125,5 @@ return [
     'password_moderate'    => 'Moderada',
     'password_strong'      => 'Forte',
     'password_very_strong' => 'Muito forte',
+    'check_breach'         => 'Verifique se o seu endereço de e-mail está em uma violação de dados',
 ];

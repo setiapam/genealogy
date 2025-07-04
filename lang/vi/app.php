@@ -35,6 +35,7 @@ return [
     'search'            => 'Tìm kiếm',
     'yes'               => 'Có',
     'no'                => 'Không',
+    'error'             => 'Lỗi',
 
     'created_at' => 'Được tạo vào',
     'updated_at' => 'Được cập nhật vào',
@@ -149,4 +150,5 @@ return [
     'password_moderate'    => 'Trung bình',
     'password_strong'      => 'Mạnh',
     'password_very_strong' => 'Rất mạnh',
+    'check_breach'         => 'Kiểm tra xem địa chỉ email của bạn có nằm trong vụ rò rỉ dữ liệu không',
 ];

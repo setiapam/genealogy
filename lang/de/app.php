@@ -35,6 +35,7 @@ return [
     'search'            => 'Suche',
     'yes'               => 'Ja',
     'no'                => 'Nein',
+    'error'             => 'Fehler',
 
     'created_at' => 'Erstellt am',
     'updated_at' => 'Aktualisiert am',
@@ -149,4 +150,5 @@ return [
     'password_moderate'    => 'Mittel',
     'password_strong'      => 'Stark',
     'password_very_strong' => 'Sehr stark',
+    'check_breach'         => 'Prüfen Sie, ob Ihre E-Mail-Adresse in einem Datenleck enthalten ist',
 ];
