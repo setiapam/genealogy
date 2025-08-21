@@ -85,10 +85,6 @@ final class Manage extends Component
 
     public function create(): void
     {
-        if (! defined('STDIN')) {
-            define('STDIN', fopen('php://stdin', 'r'));
-        }
-
         $exitCode = Artisan::call('backup:run --only-db');
         $output   = Artisan::output();
 
@@ -128,7 +124,7 @@ final class Manage extends Component
         if ($disk->exists(config('backup.backup.name') . '/' . $backup_to_delete)) {
             $disk->delete(config('backup.backup.name') . '/' . $backup_to_delete);
 
-            $this->toast()->success(__('backup.backup'), $backup_to_delete . ' ' . __('backup.deleted'))->expandable(false)->flash()->send();
+            $this->toast()->success(__('backup.backup'), e($backup_to_delete) . ' ' . __('backup.deleted'))->expandable(false)->flash()->send();
         } else {
             $this->toast()->error(__('backup.backup'), __('backup.not_found'))->flash()->send();
         }

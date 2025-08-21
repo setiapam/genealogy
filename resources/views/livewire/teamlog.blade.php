@@ -22,55 +22,57 @@
                 @foreach ($logs as $log)
                     <x-ts-card>
                         <x-slot:header>
-                            {{ $log['description'] }}
+                            <div class="p-4">
+                                {{ $log['description'] }}
+                            </div>
                         </x-slot:header>
 
                         <div class="grid grid-cols-2 gap-2">
                             @if ($log['event'] === 'updated' or $log['event'] === 'deleted')
                                 {{-- old values --}}
                                 @php
-            $headers = [['index' => 'key', 'label' => 'Key'], ['index' => 'value', 'label' => __('app.old')]];
+                                    $headers = [['index' => 'key', 'label' => 'Key'], ['index' => 'value', 'label' => __('app.old')]];
 
-            $rows = collect($log['properties_old'])
-                ->map(function ($value, $key) {
-                    return [
-                        'key' => $key,
-                        'value' => $value,
-                    ];
-                })
-                ->toArray();
+                                    $rows = collect($log['properties_old'])
+                                        ->map(function ($value, $key) {
+                                            return [
+                                                'key' => $key,
+                                                'value' => $value,
+                                            ];
+                                        })
+                                        ->toArray();
                                 @endphp
 
                                 <x-ts-table :$headers :$rows striped />
 
                                 {{-- new values --}}
                                 @php
-            $headers = [['index' => 'key', 'label' => 'Key'], ['index' => 'value', 'label' => __('app.new')]];
+                                    $headers = [['index' => 'key', 'label' => 'Key'], ['index' => 'value', 'label' => __('app.new')]];
 
-            $rows = collect($log['properties_new'])
-                ->map(function ($value, $key) {
-                    return [
-                        'key' => $key,
-                        'value' => $value,
-                    ];
-                })
-                ->toArray();
+                                    $rows = collect($log['properties_new'])
+                                        ->map(function ($value, $key) {
+                                            return [
+                                                'key' => $key,
+                                                'value' => $value,
+                                            ];
+                                        })
+                                        ->toArray();
                                 @endphp
 
                                 <x-ts-table :$headers :$rows striped />
                             @else
                                 {{-- values --}}
                                 @php
-            $headers = [['index' => 'key', 'label' => 'Key'], ['index' => 'value', 'label' => __('app.value')]];
+                                    $headers = [['index' => 'key', 'label' => 'Key'], ['index' => 'value', 'label' => __('app.value')]];
 
-            $rows = collect($log['properties'])
-                ->map(function ($value, $key) {
-                    return [
-                        'key' => $key,
-                        'value' => $value,
-                    ];
-                })
-                ->toArray();
+                                    $rows = collect($log['properties'])
+                                        ->map(function ($value, $key) {
+                                            return [
+                                                'key' => $key,
+                                                'value' => $value,
+                                            ];
+                                        })
+                                        ->toArray();
                                 @endphp
 
                                 <x-ts-table :$headers :$rows />
@@ -87,7 +89,7 @@
                 @endforeach
             </div>
         @else
-            <div class="w-192">
+            <div class="w-3xl">
                 <x-ts-alert title="{{ __('user.users') }}" text="{{ __('app.nothing_recorded') }}" color="cyan" />
             </div>
         @endif

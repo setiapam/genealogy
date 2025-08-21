@@ -1,4 +1,4 @@
-<div class="min-w-80 flex flex-col rounded-sm bg-white shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:bg-neutral-700 text-neutral-800 dark:text-neutral-50">
+<div class="min-w-xs flex flex-col rounded-sm bg-white shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:bg-neutral-700 text-neutral-800 dark:text-neutral-50">
     <div class="flex flex-col p-2 text-lg font-medium border-b-2 rounded-t h-14 min-h-min border-neutral-100 dark:border-neutral-600 dark:text-neutral-50">
         <div class="flex flex-wrap items-start justify-center gap-2">
             <div class="items-center justify-center flex-1 grow max-w-full align-middle min-w-max">
@@ -66,15 +66,15 @@
         <div class="col-span-2 py-2 pl-2 border-b">{{ __('person.parents') }}</div>
         <div class="col-span-4 p-2 border-b">
             @if ($person->parents)
-                <x-link href="/people/{{ $person->parents->person_1->id }}" @class(['text-red-600 dark:text-red-400' => $person->parents->person_1->isDeceased()])>
-                    {{ $person->parents->person_1->name }}
+                <x-link href="/people/{{ $person->parents->person1->id }}" @class(['text-red-600 dark:text-red-400' => $person->parents->person1->isDeceased()])>
+                    {{ $person->parents->person1->name }}
                 </x-link>
-                <x-ts-icon icon="tabler.{{ $person->parents->person_1->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
+                <x-ts-icon icon="tabler.{{ $person->parents->person1->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
                 <br />
-                <x-link href="/people/{{ $person->parents->person_2->id }}" @class(['text-red-600 dark:text-red-400' => $person->parents->person_2->isDeceased()])>
-                    {{ $person->parents->person_2->name }}
+                <x-link href="/people/{{ $person->parents->person2->id }}" @class(['text-red-600 dark:text-red-400' => $person->parents->person2->isDeceased()])>
+                    {{ $person->parents->person2->name }}
                 </x-link>
-                <x-ts-icon icon="tabler.{{ $person->parents->person_2->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
+                <x-ts-icon icon="tabler.{{ $person->parents->person2->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
             @endif
         </div>
 

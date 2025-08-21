@@ -40,7 +40,7 @@ final class Family extends Component
         $this->loadData();
 
         $persons = Person::where('id', '!=', $this->person->id)
-            ->OlderThan($this->person->birth_year)
+            ->olderThan($this->person->dob, $this->person->yob)
             ->orderBy('firstname')->orderBy('surname')
             ->get();
 
@@ -54,8 +54,8 @@ final class Family extends Component
             'name' => $p->name . ($p->birth_formatted ? ' (' . $p->birth_formatted . ')' : ''),
         ])->values();
 
-        $this->parents = Couple::with(['person_1', 'person_2'])
-            ->OlderThan($this->person->birth_year)
+        $this->parents = Couple::with(['person1', 'person2'])
+            ->olderThan($this->person->birth_year)
             ->get()
             ->sortBy('name')
             ->map(fn ($couple): array => [

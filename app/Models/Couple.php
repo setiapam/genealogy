@@ -7,6 +7,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,18 +38,6 @@ final class Couple extends Model
     ];
 
     /**
-     * Use the built-in $casts property for automatic casting.
-     *
-     * @var array<int, string>
-     */
-    protected $casts = [
-        'date_start' => 'date:Y-m-d',
-        'date_end'   => 'date:Y-m-d',
-        'is_married' => 'boolean',
-        'has_ended'  => 'boolean',
-    ];
-
-    /**
      * The accessors to append to the model's array form.
      *
      * @var array<int, string>
@@ -66,8 +55,8 @@ final class Couple extends Model
             ->useLogName('person_couple')
             ->setDescriptionForEvent(fn (string $eventName): string => __('couple.couple') . ' ' . __('app.event_' . $eventName))
             ->logOnly([
-                'person_1.name',
-                'person_2.name',
+                'person1.name',
+                'person2.name',
                 'date_start',
                 'date_end',
                 'is_married',
@@ -112,13 +101,13 @@ final class Couple extends Model
     // Relations
     /* -------------------------------------------------------------------------------------------- */
     /* returns PARTNER 1 (1 Person) based on person1_id in Couple model */
-    public function person_1(): BelongsTo
+    public function person1(): BelongsTo
     {
         return $this->belongsTo(Person::class, 'person1_id');
     }
 
     /* returns PARTNER 2 (1 Person) based on person2_id in Couple model */
-    public function person_2(): BelongsTo
+    public function person2(): BelongsTo
     {
         return $this->belongsTo(Person::class, 'person2_id');
     }
@@ -152,25 +141,39 @@ final class Couple extends Model
                 return;
             }
 
-            $builder->where('couples.team_id', auth()->user()->currentTeam->id);
+            $builder->where('couples.team_id', auth()->user()->currentTeam?->id);
         });
     }
 
     /* -------------------------------------------------------------------------------------------- */
     // Accessors & Mutators
     /* -------------------------------------------------------------------------------------------- */
-    protected function getNameAttribute(): ?string
+    protected function name(): Attribute
     {
-        $names = array_filter([
-            optional($this->person_1)->name,
-            optional($this->person_2)->name,
-        ]);
+        return Attribute::make(get: function (): ?string {
+            $names = array_filter([
+                $this->person1?->name,
+                $this->person2?->name,
+            ]);
 
-        return $names !== [] ? implode(' - ', $names) : null;
+            return $names !== [] ? implode(' & ', $names) : null;
+        });
     }
 
-    protected function getDateStartFormattedAttribute(): ?string
+    protected function dateStartFormatted(): Attribute
     {
-        return $this->date_start ? Carbon::parse($this->date_start)->timezone(session('timezone') ?? 'UTC')->isoFormat('LL') : null;
+        return Attribute::make(get: function (): ?string {
+            return $this->date_start ? Carbon::parse($this->date_start)->timezone(session('timezone') ?? 'UTC')->isoFormat('LL') : null;
+        });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'date_start' => 'date:Y-m-d',
+            'date_end'   => 'date:Y-m-d',
+            'is_married' => 'boolean',
+            'has_ended'  => 'boolean',
+        ];
     }
 }

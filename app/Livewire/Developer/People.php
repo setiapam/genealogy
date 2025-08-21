@@ -46,10 +46,12 @@ final class People extends Component implements HasActions, HasSchemas, HasTable
                     ->label(__('person.id'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                ImageColumn::make('photo')
+                ImageColumn::make('photo')->disk('photos')
                     ->label(__('person.avatar'))
-                    ->getStateUsing(fn (Person $record) => $record->photo ? url('storage/photos-096/' . $record->team_id . '/' . $record->photo) : url('/img/avatar.png'))
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->getStateUsing(fn (Person $record) => $record->photo ? "{$record->team_id}/{$record->id}/{$record->photo}_small.webp" : url('/img/avatar.png'))
+                    ->toggleable(isToggledHiddenByDefault: false)
+                    ->extraImgAttributes(['alt' => 'Avatar', 'loading' => 'lazy'])
+                    ->alignment('center'),
                 TextColumn::make('name')
                     ->label(__('person.name'))
                     ->verticallyAlignStart()
@@ -71,10 +73,14 @@ final class People extends Component implements HasActions, HasSchemas, HasTable
                     ->searchable(),
                 TextColumn::make('father.name')
                     ->label(__('person.father'))
+                    ->url(fn (Person $record): string => '../people/' . $record->father_id)
+                    ->color('info')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('mother.name')
                     ->label(__('person.mother'))
+                    ->url(fn (Person $record): string => '../people/' . $record->mother_id)
+                    ->color('info')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('dob')
@@ -127,7 +133,7 @@ final class People extends Component implements HasActions, HasSchemas, HasTable
                     ])
                     ->label(__('person.sex')),
             ])
-            ->actions([
+            ->recordActions([
                 DeleteAction::make()
                     ->iconButton()
                     ->requiresConfirmation()

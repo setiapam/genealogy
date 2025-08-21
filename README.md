@@ -23,9 +23,9 @@
 This <b>TallStack</b> application is build using :
 
 <ul>
-    <li><a href="https://laravel.com/" target="_blank">Laravel</a> 11</li>
+    <li><a href="https://laravel.com/" target="_blank">Laravel</a> 12</li>
     <li><a href="https://jetstream.laravel.com/" target="_blank">Laravel Jetstream</a> 5 (featuring <a href="https://jetstream.laravel.com/features/teams.html" target="_blank">Teams</a>)</li>
-    <li><a href="https://livewire.laravel.com/" target="_blank">Livewire</a> 3</li>
+    <li><a href="https://livewire.laravel.com/" target="_blank">Livewire</a> 4</li>
     <li><a href="https://alpinejs.dev/" target="_blank">Alpine.js</a> 3</li>
     <li><a href="https://tailwindcss.com/" target="_blank">Tailwind CSS</a> 4</li>
     <li><a href="https://tallstackui.com//" target="_blank">TallStackUI</a> 2 (featuring <a href="https://tabler.io/icons" target="_blank">Tabler Icons</a>)</li>
@@ -53,6 +53,9 @@ This <b>TallStack</b> application is build using :
 ### Requirements
 
 <ul>
+    <li>
+        The application must be served in HTTPS mode, not in HTTP.<br/>
+    </li>
     <li>
         At least <a href="https://www.php.net/" target="_blank">PHP</a> 8.4, supporting Laravel 12.<br/>
     </li>
@@ -289,6 +292,10 @@ make the needed changes regarding name, url, database connection & mail server
 ## Updating
 
 Update instructions can be found in <a href="https://github.com/MGeurts/genealogy/blob/main/README-UPDATE.md" target="_blank">README-UPDATE.md</a>.
+
+## Reporting security issues
+
+Instructions on how to report security issues can be found in <a href="https://github.com/MGeurts/genealogy/blob/main/SECURITY.md" target="_blank">SECURITY.md</a>.
 
 ## Testing
 

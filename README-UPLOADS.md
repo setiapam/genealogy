@@ -7,64 +7,105 @@ Below is a guide to help you understand how uploads are handled and what types o
 
 ---
 
-### 📸 Image Uploads
+<div style="background-color: #ffebee; border: 2px solid #f44336; border-radius: 8px; padding: 16px; margin: 16px 0;">
+<h2 style="color: #c62828; margin-top: 0;">⚠️ Important Migration Notice</h2>
 
-#### Storage Folders
+**If you are upgrading from a version prior to 4.5.0**, the photo folder structure has been completely reorganized. Before using the application with version 4.5.0 or higher, you **MUST** run the photo migration command **ONCE**:
 
-Uploaded photos by default are saved in the following folders:
+```bash
+# First, preview what will happen (recommended)
+php artisan photos:migrate --dry-run
 
--   `photos`: Original image
--   `photos-096`: Small version (typically 96 pixels wide)
--   `photos-384`: Medium version (typically 384 pixels wide)
-
-These versions allow the application to serve optimized images depending on the context (e.g., thumbnails, previews).
-
-```php
-'photo_folders' => [
-    'photos',
-    'photos-096',
-    'photos-384',
-],
+# Then run the actual migration
+php artisan photos:migrate
 ```
 
-These folders should **not be modified** as they are used everywhere in the application.
+**What changed in version 4.5.0:**
+
+-   **Before 4.5.0**: Photos were stored in separate folders (`photos/`, `photos-096/`, `photos-384/`) with a flat `teamId/filename` structure
+-   **From 4.5.0**: Photos are stored in a unified `photos/` folder with nested `teamId/personId/` structure
+
+**Migration features:**
+
+-   ✅ Automatic backup creation before migration
+-   ✅ Support for all image formats (not just WebP)
+-   ✅ Run-once protection to prevent accidental re-execution
+-   ✅ Dry-run mode to preview changes: `php artisan photos:migrate --dry-run`
+
+**This migration is mandatory and safe** - your original photos will be backed up automatically before any changes are made.
+
+📖 **For complete migration documentation, examples, and recovery procedures, see [README-PHOTO-MIGRATION.md](README-PHOTO-MIGRATION.md)**
+
+</div>
+
+---
+
+### 📸 Image Uploads
+
+#### Storage Folder
+
+Uploaded photos are saved in the photos folder using the filename template:
+
+`personId_sequence_timestamp[_size].webp`
+
+    Example:
+    552_001_20250815T073948.webp           (original)
+    552_001_20250815T073948_medium.webp    (medium size, by default 384 pixels wide)
+    552_001_20250815T073948_small.webp     (small size, by default 96 pixels wide)
+
+These versions allow the application to serve optimized image sizes depending on the context (e.g., thumbnails, previews, full image).
 
 ---
 
 #### Upload Settings
 
-By default, uploaded images are processed using these settings:
+Uploaded images are **ALWAYS** converted to `.webp` format for optimal web performance and processed using these settings:
 
 ```php
-'upload_photo' => [
-    'type'          => 'webp',
-    'max_width'     => 1920,
-    'max_height'    => 1080,
-    'quality'       => 85,
-    'add_watermark' => env('PHOTOS_ADD_WATERMARK', false),
-],
+    'upload_photo' => [
+        'max_width'     => 1920,
+        'max_height'    => 1080,
+        'quality'       => 85,
+        'add_watermark' => env('PHOTOS_ADD_WATERMARK', false),
+        'sizes'         => [
+            'original' => [
+                'width'  => 1920,
+                'height' => 1080,
+            ],
+            'medium' => [
+                'width'  => 384,
+                'height' => null,
+            ],
+            'small' => [
+                'width'  => 96,
+                'height' => null,
+            ],
+        ],
+    ],
 ```
 
--   **type**: All images are converted to `.webp` format for optimal web performance.
 -   **max_width / max_height**: Images are resized to fit within these dimensions while maintaining aspect ratio.
 -   **quality**: Compression quality (0–100). Higher = better quality but larger file size.
 -   **add_watermark**: Adds a watermark automatically to uploaded images.
+    **sizes**: You can customize the dimensions but the size names (original, medium, small) **MUST STAY** untouched as they are hardcoded in the application.
 
-These values can be modified according to your preferences in `/config/app.php`.
+Thes values can be modified according to your preferences in `/config/app.php`.
 Only the `add_Watermark` setting is imported from your `.env`.
 
 ---
 
 #### Accepted Image Formats
 
-By default, only the following image types are allowed for upload:
+Only the following image types are allowed for upload:
 
 ```php
 'upload_photo_accept' => [
+    'image/bmp'     => 'BMP',
     'image/gif'     => 'GIF',
     'image/jpeg'    => 'JPEG',
     'image/png'     => 'PNG',
     'image/svg+xml' => 'SVG',
+    'image/tiff'    => 'TIFF',
     'image/webp'    => 'WEBP',
 ],
 ```
@@ -78,7 +119,7 @@ These values can be modified according to your preferences in `/config/app.php`.
 
 #### Accepted File Types
 
-By default, the following document types are accepted for upload:
+The following document types are accepted for upload:
 
 ```php
 'upload_file_accept' => [
@@ -92,7 +133,7 @@ By default, the following document types are accepted for upload:
 ],
 ```
 
-Uploads that don’t match these MIME types will be rejected.
+Uploads that don't match these MIME types will be rejected.
 These values can be modified according to your preferences in `/config/app.php`.
 
 ---
@@ -105,7 +146,7 @@ These values can be modified according to your preferences in `/config/app.php`.
 
 The maximum file size for uploads is **10 MB (10,240 KB)**.
 
-Ensure your server’s PHP configuration supports this limit by checking:
+Ensure your server's PHP configuration supports this limit by checking:
 
 -   `upload_max_filesize`
 -   `post_max_size`
@@ -118,3 +159,4 @@ The limit above should be changed to match the values in your `php.ini` file.
 
 -   Ensure the file format and size match the allowed settings.
 -   If watermarking fails or images look distorted, verify the source image's quality.
+-   **For version upgrades from pre-4.5.0**: Make sure you've run the migration command **ONCE** before using the application.

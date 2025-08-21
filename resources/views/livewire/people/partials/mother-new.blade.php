@@ -1,5 +1,5 @@
 <div>
-    <div class="p-4 md:w-192 bg-neutral-200">
+    <div class="p-4 md:w-3xl bg-neutral-200">
         <x-ts-errors class="mb-2" close />
 
         <div class="grid grid-cols-6 gap-5">
@@ -10,7 +10,7 @@
 
             {{-- surname --}}
             <div class="col-span-6 md:col-span-3">
-                <x-ts-input wire:model="form.surname" id="surname" label="{{ __('person.surname') }} : *" autocomplete="surname" />
+                <x-ts-input wire:model="form.surname" id="surname" label="{{ __('person.surname') }} : *" autocomplete="surname" required/>
             </div>
 
             {{-- birthname --}}

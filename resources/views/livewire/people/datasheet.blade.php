@@ -1,4 +1,4 @@
-<div class="w-full min-w-max max-w-192 grow dark:text-neutral-200">
+<div class="w-full min-w-max max-w-3xl grow dark:text-neutral-200">
     <table class="table-auto">
         <tbody>
             {{-- names --}}
@@ -12,22 +12,22 @@
             <tr class="align-top">
                 <td colspan="2">&nbsp;</td>
                 <td>{{ __('person.firstname') }} :</td>
-                <td class="break-words max-w-96">{{ $person->firstname }}</td>
+                <td class="break-words max-w-sm">{{ $person->firstname }}</td>
             </tr>
             <tr class="align-top">
                 <td colspan="2">&nbsp;</td>
                 <td>{{ __('person.surname') }} :</td>
-                <td class="break-words max-w-96">{{ $person->surname }}</td>
+                <td class="break-words max-w-sm">{{ $person->surname }}</td>
             </tr>
             <tr class="align-top">
                 <td colspan="2">&nbsp;</td>
                 <td>{{ __('person.birthname') }} :</td>
-                <td class="break-words max-w-96">{{ $person->birthname }}</td>
+                <td class="break-words max-w-sm">{{ $person->birthname }}</td>
             </tr>
             <tr class="align-top">
                 <td colspan="2">&nbsp;</td>
                 <td>{{ __('person.nickname') }} :</td>
-                <td class="break-words max-w-96">{{ $person->nickname }}</td>
+                <td class="break-words max-w-sm">{{ $person->nickname }}</td>
             </tr>
 
             {{-- sex & gender --}}
@@ -47,7 +47,7 @@
             <tr class="align-top">
                 <td colspan="2">&nbsp;</td>
                 <td>{{ __('person.gender') }} :</td>
-                <td class="break-words max-w-96">{{ $person->gender ? $person->gender->name : '' }}</td>
+                <td class="break-words max-w-sm">{{ $person->gender ? $person->gender->name : '' }}</td>
             </tr>
 
             {{-- birth --}}
@@ -64,7 +64,7 @@
             <tr class="align-top">
                 <td colspan="2">&nbsp;</td>
                 <td>{{ __('person.pob') }} :</td>
-                <td class="break-words max-w-96">{{ $person->pob }}</td>
+                <td class="break-words max-w-sm">{{ $person->pob }}</td>
             </tr>
             <tr class="align-top">
                 <td colspan="2">&nbsp;</td>
@@ -87,14 +87,14 @@
                 <tr class="align-top">
                     <td colspan="2">&nbsp;</td>
                     <td>{{ __('person.pod') }} :</td>
-                    <td class="break-words max-w-96">{{ $person->pod }}</td>
+                    <td class="break-words max-w-sm">{{ $person->pod }}</td>
                 </tr>
                 <tr class="align-top">
                     <td colspan="2">&nbsp;</td>
                     <td>{{ __('person.cemetery') }} :</td>
-                    <td class="break-words max-w-96">
+                    <td class="break-words max-w-sm">
                         @php
-    $cemetery = array_filter([$person->getMetadataValue('cemetery_location_name'), $person->getMetadataValue('cemetery_location_address')]);
+                            $cemetery = array_filter([$person->getMetadataValue('cemetery_location_name'), $person->getMetadataValue('cemetery_location_address')]);
                         @endphp
 
                         @foreach ($cemetery as $line)
@@ -116,12 +116,12 @@
                 <tr class="align-top">
                     <td colspan="2">&nbsp;</td>
                     <td>{{ __('person.address') }} :</td>
-                    <td class="break-words whitespace-pre-line max-w-96">{{ $person->address }}</td>
+                    <td class="break-words whitespace-pre-line max-w-sm">{{ $person->address }}</td>
                 </tr>
                 <tr class="align-top">
                     <td colspan="2">&nbsp;</td>
                     <td>{{ __('person.phone') }} :</td>
-                    <td class="break-words max-w-96">{{ $person->phone }}</td>
+                    <td class="break-words max-w-sm">{{ $person->phone }}</td>
                 </tr>
             @endif
 
@@ -137,7 +137,7 @@
 
             <tr class="align-top">
                 <td colspan="2">&nbsp;</td>
-                <td colspan="2" class="break-words whitespace-pre-line max-w-96">{{ $person->summary }}</td>
+                <td colspan="2" class="break-words whitespace-pre-line max-w-sm">{{ $person->summary }}</td>
             </tr>
 
             <tr>
@@ -176,10 +176,10 @@
                 <td>{{ __('person.parents') }} :</td>
                 <td>
                     @if ($person->parents)
-                        {{ $person->parents->person_1->name }} <x-ts-icon icon="tabler.{{ $person->parents->person_1->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
-                        {{ $person->parents->person_1->birth_year }}<br />
-                        {{ $person->parents->person_2->name }} <x-ts-icon icon="tabler.{{ $person->parents->person_2->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
-                        {{ $person->parents->person_2->birth_year }}
+                        {{ $person->parents->person1->name }} <x-ts-icon icon="tabler.{{ $person->parents->person1->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
+                        {{ $person->parents->person1->birth_year }}<br />
+                        {{ $person->parents->person2->name }} <x-ts-icon icon="tabler.{{ $person->parents->person2->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
+                        {{ $person->parents->person2->birth_year }}
                     @endif
                 </td>
             </tr>
@@ -214,13 +214,13 @@
                     <td colspan="3">&nbsp;</td>
                     <td>
                         @if ($couple->person2_id === $person->id)
-                            {{ $couple->person_1->name }}
+                            {{ $couple->person1->name }}
 
-                            <x-ts-icon icon="tabler.{{ $couple->person_1->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
+                            <x-ts-icon icon="tabler.{{ $couple->person1->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
                         @else
-                            {{ $couple->person_2->name }}
+                            {{ $couple->person2->name }}
 
-                            <x-ts-icon icon="tabler.{{ $couple->person_2->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
+                            <x-ts-icon icon="tabler.{{ $couple->person2->sex === 'm' ? 'gender-male' : 'gender-female' }}" class="inline-block size-5" />
                         @endif
 
                         @if ($couple->is_married)
@@ -335,7 +335,7 @@
     <div class="grid grid-cols-3 gap-2 mt-2">
         @foreach ($images as $image)
             <div>
-                <img class="rounded-sm max-w-48" src="{{ asset('storage/photos-384/' . $person->team_id . '/' . $image) }}" alt="{{ $person->name }}" />
+                <img class="rounded-sm max-w-48" src="{{ asset('storage/photos/' . $person->team_id . '/' . $person->id . '/'  . $image) }}" alt="{{ $person->name }}" />
             </div>
         @endforeach
     </div>
