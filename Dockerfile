@@ -1,35 +1,73 @@
-FROM unit:1.34.1-php8.3
+############################################
+# Base Image
+############################################
 
-RUN apt update && apt install -y \
-    curl unzip git libicu-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libssl-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pcntl opcache pdo pdo_mysql intl zip gd exif ftp bcmath \
-    && pecl install redis \
-    && docker-php-ext-enable redis
+# Learn more about the Server Side Up PHP Docker Images at:
+# https://serversideup.net/open-source/docker-php/
+FROM serversideup/php:8.4-fpm-nginx AS base
 
-RUN echo "opcache.enable=1" > /usr/local/etc/php/conf.d/custom.ini \
-    && echo "opcache.jit=tracing" >> /usr/local/etc/php/conf.d/custom.ini \
-    && echo "opcache.jit_buffer_size=256M" >> /usr/local/etc/php/conf.d/custom.ini \
-    && echo "memory_limit=512M" > /usr/local/etc/php/conf.d/custom.ini \        
-    && echo "upload_max_filesize=64M" >> /usr/local/etc/php/conf.d/custom.ini \
-    && echo "post_max_size=64M" >> /usr/local/etc/php/conf.d/custom.ini
+# Switch to root before installing our PHP extensions
+USER root
 
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+RUN install-php-extensions gd xsl exif intl
 
-WORKDIR /var/www/html
+USER www-data
 
-RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache
+############################################
+# Development Image
+############################################
+FROM base AS development
 
-RUN chown -R unit:unit /var/www/html/storage bootstrap/cache && chmod -R 775 /var/www/html/storage
+# We can pass USER_ID and GROUP_ID as build arguments
+# to ensure the www-data user has the same UID and GID
+# as the user running Docker.
+ARG USER_ID
+ARG GROUP_ID
 
-COPY . .
+# Switch to root so we can set the user ID and group ID
+USER root
+RUN docker-php-serversideup-set-id www-data $USER_ID:$GROUP_ID  && \
+    docker-php-serversideup-set-file-permissions --owner $USER_ID:$GROUP_ID --service nginx
 
-RUN chown -R unit:unit storage bootstrap/cache && chmod -R 775 storage bootstrap/cache
+RUN install-php-extensions pcov
 
-RUN composer install --prefer-dist --optimize-autoloader --no-interaction
+# Switch back to the unprivileged www-data user
+USER www-data
 
-COPY unit.json /docker-entrypoint.d/unit.json
+############################################
+# CI image
+############################################
+FROM serversideup/php:8.4-cli AS ci
 
-EXPOSE 8000
+ENV PHP_MEMORY_LIMIT=2G
 
-CMD ["unitd", "--no-daemon"]
+# Sometimes CI images need to run as root
+# so we set the ROOT user and configure
+# the PHP-FPM pool to run as www-data
+USER root
+
+RUN install-php-extensions intl gd xsl exif pcov
+
+############################################
+# Production Image
+############################################
+FROM base AS deploy
+
+# Laravel Autorun Automations - ServerSideUp configurations
+ENV AUTORUN_ENABLED=true
+ENV AUTORUN_LARAVEL_MIGRATION=true
+ENV AUTORUN_LARAVEL_STORAGE_LINK=true
+ENV AUTORUN_LARAVEL_EVENT_CACHE=true
+ENV AUTORUN_LARAVEL_ROUTE_CACHE=true
+ENV AUTORUN_LARAVEL_VIEW_CACHE=true
+ENV AUTORUN_LARAVEL_CONFIG_CACHE=true
+ENV PHP_OPCACHE_ENABLE=1
+
+# Copy the rest of the application
+COPY --chown=www-data:www-data . /var/www/html
+COPY --chown=www-data:www-data --chmod=755 .docker/etc/entrypoint.d /etc/entrypoint.d
+
+
+RUN rm -rf tests/
+
+RUN composer install --no-dev --optimize-autoloader --no-scripts
