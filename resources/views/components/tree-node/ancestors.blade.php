@@ -1,13 +1,13 @@
 @props(['person', 'ancestors', 'level_current' => 0, 'level_max'])
 
 @php
-$level_current++;
+    $level_current++;
 
-$person_sequence = $ancestors->firstWhere('id', $person->id)->sequence;
+    $person_sequence = $ancestors->firstWhere('id', $person->id)->sequence;
 
-$ancestors_next = $ancestors->where('degree', $level_current)->filter(function ($item) use ($person_sequence): bool {
-    return strpos($item->sequence, $person_sequence) !== false;
-});
+    $ancestors_next = $ancestors->where('degree', $level_current)->filter(function ($item) use ($person_sequence): bool {
+        return strpos($item->sequence, $person_sequence) !== false;
+    });
 @endphp
 
 <li>
@@ -18,6 +18,7 @@ $ancestors_next = $ancestors->where('degree', $level_current)->filter(function (
                     @php
                         $photoPath = $person->team_id . '/' . $person->id . '/' . $person->photo . '_small.webp';
                     @endphp
+
                     @if ($person->photo && Storage::disk('photos')->exists($photoPath))
                         <img src="{{ Storage::disk('photos')->url($photoPath) }}" class="w-full rounded-sm shadow-lg dark:shadow-black/30" alt="{{ $person->id }}" />
                     @else
@@ -25,11 +26,15 @@ $ancestors_next = $ancestors->where('degree', $level_current)->filter(function (
                     @endif
 
                     @if ($person->dod or $person->yod)
-                        <div class="ribbon">{{ __('person.deceased') }}</div>
+                        <div class="ribbon" title="{{ __('person.deceased') }}">&nbsp;</div>
                     @endif
                 </div>
 
-                <figcaption @class(['text-red-600 dark:text-red-400' => $person->dod or $person->yod, 'text-primary-500 dark:text-primary-300' => !($person->dod or $person->yod)])>
+                <figcaption @class([
+                    'text-red-600 dark:text-red-400' => $person->dod or $person->yod,
+                    'text-primary-500 dark:text-primary-300' => !($person->dod or $person->yod),
+                    'line-clamp-2 text-xs leading-tight w-24 wrap-break-word'
+                ]) title="{{ implode(' ', array_filter([$person->firstname, $person->surname])) }}">
                     {{ implode(' ', array_filter([$person->firstname, $person->surname])) }}
                 </figcaption>
             </figure>

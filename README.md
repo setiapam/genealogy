@@ -299,7 +299,7 @@ Translation integrity can be checked by issuing the command `php artisan transla
 
 Instructions on how to add a language can be found in <a href="https://github.com/MGeurts/genealogy/blob/main/README-LANGUAGES.md" target="_blank">README-LANGUAGES.md<br/>
 
-The applocation does **not support Right To Left (RTL) languages** like Arabic, Hebrew, Persian, Urdu, Pashto, Kurdish (Sorani), Uyghur, Syriac, Thaana, North Korean.</a>
+The application does **not support Right To Left (RTL) languages** like Arabic, Hebrew, Persian, Urdu, Pashto, Kurdish (Sorani), Uyghur, Syriac, Thaana, North Korean.</a>
 
 ## Uploads
 
@@ -346,7 +346,11 @@ Testing is done using <a href="https://pestphp.com/">Pest</a>.<br/>
 Command: `php artisan test` or `./vendor/bin/pest`<br/>
 
 <b>Production (or local development) data</b> should be stored in a MySQL or MariaDB database configured in `.env`.<br /><br />
-<b>Testing data</b> should be stored in a separate MySQL or MariaDB database configured in `.env.testing` to avoid interfering with the production or development data.
+<b>Testing data</b> should be stored in a separate MySQL or MariaDB database configured in `.env.testing` to avoid interfering with the production or development data.<br /><br />
+
+Command to create the testing MySQL database:
+
+`php artisan migrate --env=testing`
 
 ## Contributing
 

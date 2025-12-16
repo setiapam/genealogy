@@ -14,6 +14,8 @@ return [
     'useful_links'              => 'Liens utiles',
     'impressum'                 => 'Mentions légales',
     'log_viewer'                => 'Visionneuse de journaux',
+    'all'                       => 'Tous',
+    'filter'                    => 'Filtrer',
     'api_tokens'                => 'Jetons API',
     'attention'                 => 'Attention',
     'contact'                   => 'Contact',
@@ -94,8 +96,9 @@ return [
     'people_search_help_1'      => 'Le système recherchera <b class="text-emerald-600">chaque mot</b> dans la zone de recherche dans les attributs <b class="text-emerald-600">nom de famille</b>, < b class="text-emerald-600">prénom</b>, <b class="text-emerald-600">nom de naissance</b> et <b class="text-emerald-600">surnom</ b>.',
     'people_search_help_2'      => 'Commencez la chaîne de recherche par <b class="text-emerald-600">%</b> si vous souhaitez rechercher des parties de noms, par exemple : <b class="text-emerald-600">%Jr </b>.<br/>Sachez que ce type de recherche est plus lent.',
     'people_search_help_3'      => 'Si un nom, un prénom, un nom de naissance ou un surnom contient des <b class="text-emerald-600">espaces</b>, placez le nom entre guillemets doubles,<br/>par exemple : <b class=" text-emerald-600">"John Fitzgerald Jr." Kennedy.',
-    'unauthorized_access'       => 'Accès non autorisé.',
-    'terminal'                  => 'Terminal',
+
+    'unauthorized_access' => 'Accès non autorisé.',
+    'terminal'            => 'Terminal',
 
     'event_added'       => 'ajouté',
     'event_created'     => 'créé',

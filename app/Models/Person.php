@@ -125,10 +125,10 @@ final class Person extends Model implements HasMedia
     public function scopeSearch(Builder $query, string $searchString): void
     {
         /* -------------------------------------------------------------------------------------------- */
-        // The system wil look up every word in the search value in the attributes surname, firstname, birthname and nickname
+        // The system will look up every word in the search value in the attributes surname, firstname, birthname and nickname
         // Begin the search string with % if you want to search parts of names, for instance %Jr.
         // Be aware that this kinds of searches are slower.
-        // If a name containes any spaces, enclose the name in double quoutes, for instance "John Fitzgerald Jr." Kennedy.
+        // If a name contains any spaces, enclose the name in double quotes, for instance "John Fitzgerald Jr." Kennedy.
         /* -------------------------------------------------------------------------------------------- */
         if (mb_trim($searchString) === '%' || empty(mb_trim($searchString))) {
             return;
@@ -143,7 +143,20 @@ final class Person extends Model implements HasMedia
         collect(str_getcsv($searchString, ' ', '"'))
             ->filter()
             ->each(function (string $searchTerm) use ($query, $escapeLike): void {
-                $term = $escapeLike($searchTerm) . '%';
+                // Check if term starts with % for wildcard search
+                $isWildcard = str_starts_with($searchTerm, '%');
+
+                if ($isWildcard) {
+                    // Remove the % prefix and escape the rest
+                    $term        = mb_ltrim($searchTerm, '%');
+                    $escapedTerm = $escapeLike($term);
+                    // Add % at both ends for LIKE %term% (search anywhere in field)
+                    $term = '%' . $escapedTerm . '%';
+                } else {
+                    // Normal prefix search - escape and add % at end
+                    $term = $escapeLike($searchTerm) . '%';
+                }
+
                 $query->whereAny(['firstname', 'surname', 'birthname', 'nickname'], 'like', $term);
             });
     }
@@ -253,50 +266,8 @@ final class Person extends Model implements HasMedia
     }
 
     /* -------------------------------------------------------------------------------------------- */
-    // Counters and checks
+    // Checks
     /* -------------------------------------------------------------------------------------------- */
-    public function countFiles(): int
-    {
-        return $this->getMedia('files')?->count() ?? 0;
-    }
-
-    public function countPhotos(): int
-    {
-        $disk      = Storage::disk('photos');
-        $directory = "{$this->team_id}/{$this->id}";
-
-        if (! $disk->exists($directory)) {
-            return 0;
-        }
-
-        // Derive valid extensions from accepted photo MIME types in config/app.php
-        $validExtensions = collect(config('app.upload_photo_accept'))
-            ->keys() // e.g. ["image/jpeg", "image/png", ...]
-            ->map(fn ($mime) => Str::after($mime, '/')) // "jpeg", "png", ...
-            ->push('jpg') // ensure "jpg" is included alongside "jpeg"
-            ->unique()
-            ->toArray();
-
-        $files = $disk->files($directory);
-
-        $baseNames = collect($files)
-            // Filter only valid image extensions and ignore system files
-            ->filter(function ($file) use ($validExtensions): bool {
-                $extension = mb_strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                $ignored   = ['gitignore', 'db']; // for .gitignore, thumbs.db
-
-                return in_array($extension, $validExtensions) && ! in_array($extension, $ignored);
-            })
-            // Extract filename without extension
-            ->map(fn ($file) => pathinfo($file, PATHINFO_FILENAME))
-            // Normalize by removing _large, _medium, _small suffixes
-            ->map(fn ($name) => preg_replace('/_(large|medium|small)$/i', '', $name))
-            // Count unique base names
-            ->unique();
-
-        return $baseNames->count();
-    }
-
     public function isDeceased(): bool
     {
         return ! is_null($this->dod) || ! is_null($this->yod);
@@ -378,18 +349,23 @@ final class Person extends Model implements HasMedia
     public function getPartnersAttribute(): Collection
     {
         if (! array_key_exists('partners', $this->relations)) {
-            $partners = $this->belongsToMany(self::class, 'couples', 'person1_id', 'person2_id')
+            // Fetch partners where this person is person1
+            $partnersAsPerson1 = $this->belongsToMany(self::class, 'couples', 'person1_id', 'person2_id')
                 ->withPivot(['id', 'date_start', 'date_end', 'is_married', 'has_ended'])
-                ->with('children')
                 ->orderByPivot('date_start')
-                ->get()
-                ->merge(
-                    $this->belongsToMany(self::class, 'couples', 'person2_id', 'person1_id')
-                        ->withPivot(['id', 'date_start', 'date_end', 'is_married', 'has_ended'])
-                        ->with('children')
-                        ->orderByPivot('date_start')
-                        ->get()
-                );
+                ->get();
+
+            // Fetch partners where this person is person2
+            $partnersAsPerson2 = $this->belongsToMany(self::class, 'couples', 'person2_id', 'person1_id')
+                ->withPivot(['id', 'date_start', 'date_end', 'is_married', 'has_ended'])
+                ->orderByPivot('date_start')
+                ->get();
+
+            // Merge both collections FIRST
+            $partners = $partnersAsPerson1->merge($partnersAsPerson2);
+
+            // THEN eager load children for ALL partners at once
+            $partners->load('children');
 
             $this->setRelation('partners', $partners);
         }
@@ -509,6 +485,15 @@ final class Person extends Model implements HasMedia
 
             $builder->where('people.team_id', auth()->user()->currentTeam->id);
         });
+
+        // Handle force deletes (permanent deletion only)
+        self::forceDeleted(function (Person $person): void {
+            // Clean up photos
+            Storage::disk('photos')->deleteDirectory($person->team_id . '/' . $person->id);
+
+            // Clean up files
+            $person->clearMediaCollection('files');
+        });
     }
 
     /* -------------------------------------------------------------------------------------------- */
@@ -540,13 +525,13 @@ final class Person extends Model implements HasMedia
             } elseif ($this->yob) {
                 if ($this->dod) {
                     // deceased based on yob & dod
-                    $age = (int) Carbon::parse($this->dod)->format('Y') - $this->yod;
+                    $age = (int) Carbon::parse($this->dod)->format('Y') - $this->yob;
                 } elseif ($this->yod) {
                     // deceased based on yob & yod
                     $age = $this->yod - $this->yob;
                 } else {
                     // living
-                    $age = Carbon::today()->format('Y') - $this->yob;
+                    $age = (int) Carbon::today()->format('Y') - $this->yob;
                 }
             } else {
                 $age = null;

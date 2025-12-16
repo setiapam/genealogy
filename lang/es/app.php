@@ -14,6 +14,8 @@ return [
     'useful_links'              => 'Enlaces útiles',
     'impressum'                 => 'Impresión',
     'log_viewer'                => 'Visor de registros',
+    'all'                       => 'Todos',
+    'filter'                    => 'Filtrar',
     'api_tokens'                => 'tokens API',
     'attention'                 => 'Atención',
     'contact'                   => 'Contacto',
@@ -94,8 +96,9 @@ return [
     'people_search_help_1'      => 'El sistema buscará <b class="text-emerald-600">cada palabra</b> en el cuadro de búsqueda en los atributos <b class="text-emerald-600">apellido</b>, < b class="text-emerald-600">nombre</b>, <b class="text-emerald-600">nombre de nacimiento</b> y <b class="text-emerald-600">apodo</ b>.',
     'people_search_help_2'      => 'Comience la cadena de búsqueda con <b class="text-emerald-600">%</b> si desea buscar partes de nombres, por ejemplo : <b class="text-emerald-600">%Jr </b>.<br/>Tenga en cuenta que este tipo de búsquedas son más lentas.',
     'people_search_help_3'      => 'Si un apellido, nombre, nombre de nacimiento o apodo contiene <b class="text-emerald-600">espacios</b>, incluya el nombre entre comillas dobles,<br/>por ejemplo : <b class=" texto-esmeralda-600">"John Fitzgerald Jr." Kennedy</b>.',
-    'unauthorized_access'       => 'Acceso no autorizado.',
-    'terminal'                  => 'Terminal',
+
+    'unauthorized_access' => 'Acceso no autorizado.',
+    'terminal'            => 'Terminal',
 
     'event_added'       => 'agregada/agregado',
     'event_created'     => 'creada/creado',
