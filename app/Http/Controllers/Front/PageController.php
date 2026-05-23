@@ -16,20 +16,34 @@ final class PageController extends Controller
     {
         $homeFile = Jetstream::localizedMarkdownPath(app()->getLocale() . '/' . 'home.md');
 
-        return view('home', [
-            'home' => Str::markdown(file_get_contents($homeFile)),
-        ]);
-    }
+        if ($homeFile === null) {
+            abort(404, 'Home page file not found');
+        }
 
-    public function passwordGenerator(): View
-    {
-        return view('front.password-generator');
+        $content = file_get_contents($homeFile);
+
+        if ($content === false) {
+            abort(404, 'Home page content not found');
+        }
+
+        return view('home', [
+            'home' => Str::markdown($content),
+        ]);
     }
 
     public function about(): View
     {
         $aboutFile = Jetstream::localizedMarkdownPath(app()->getLocale() . '/' . 'about.md');
-        $markdown  = file_get_contents($aboutFile);
+
+        if ($aboutFile === null) {
+            abort(404, 'About page file not found');
+        }
+
+        $markdown = file_get_contents($aboutFile);
+
+        if ($markdown === false) {
+            abort(404, 'About page content not found');
+        }
 
         // First render as Blade (to process {{ date('Y') }}, etc.)
         $compiledBlade = Blade::render($markdown);
@@ -44,8 +58,18 @@ final class PageController extends Controller
     {
         $helpFile = Jetstream::localizedMarkdownPath('help.md');
 
+        if ($helpFile === null) {
+            abort(404, 'Help page file not found');
+        }
+
+        $content = file_get_contents($helpFile);
+
+        if ($content === false) {
+            abort(404, 'Help page content not found');
+        }
+
         return view('help', [
-            'help' => Str::markdown(file_get_contents($helpFile)),
+            'help' => Str::markdown($content),
         ]);
     }
 }

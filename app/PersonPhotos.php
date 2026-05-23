@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App;
 
 use App\Models\Person;
+use Exception;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Alignment;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Format;
 use Intervention\Image\ImageManager;
+use RuntimeException;
 use Throwable;
 
 final class PersonPhotos
@@ -23,8 +27,12 @@ final class PersonPhotos
 
     private readonly string $personId;
 
+    /** @var array<int, string>|null */
     private ?array $cachedFiles = null;
 
+    /**
+     * @param  array{sizes?: array<string, array{width: int, height: int, quality?: int}>, add_watermark?: bool}|null  $uploadConfig
+     */
     public function __construct(
         private readonly Person $person,
         private readonly ImageManager $imageManager = new ImageManager(new Driver()),
@@ -213,7 +221,9 @@ final class PersonPhotos
     /**
      * Get all original photos with metadata.
      *
-     * @return array Array of photo data with URLs for all size variants
+     * Return an array of photo data with URLs for all size variants
+     *
+     * @return array<int, array{name: string, extension: string, is_primary: bool, url_original: string, url_large: string, url_medium: string, url_small: string}>
      */
     public function getAllPhotos(): array
     {
@@ -415,11 +425,19 @@ final class PersonPhotos
      */
     private function savePhoto(UploadedFile|string $photo, int $index): bool
     {
-        $timestamp = now()->format('YmdHis');
-
         try {
+            if ($photo instanceof UploadedFile && ! $this->isValidImage($photo)) {
+                Log::warning('Invalid image file rejected', [
+                    'person_id' => $this->person->id,
+                    'filename'  => $photo->getClientOriginalName(),
+                ]);
+
+                return false;
+            }
+
             $fileContent = $this->getFileContent($photo);
             $extension   = $this->getFileExtension($photo);
+            $timestamp   = (string) time();
 
             $originalSaved = $this->saveOriginalFile($fileContent, $extension, $index, $timestamp);
 
@@ -429,13 +447,13 @@ final class PersonPhotos
 
             $variantsSaved = $this->processAndSaveVariants($fileContent, $index, $timestamp);
 
-            if ($originalSaved && empty($this->person->photo)) {
+            if (empty($this->person->photo)) {
                 $this->person->update([
                     'photo' => $this->makeFilename($index, $timestamp, 'original', false),
                 ]);
             }
 
-            return $originalSaved && $variantsSaved;
+            return $variantsSaved;
         } catch (Throwable $e) {
             Log::error('Failed to save photo', [
                 'person_id'   => $this->person->id,
@@ -498,7 +516,7 @@ final class PersonPhotos
         $savedAny = false;
 
         try {
-            $original = $this->imageManager->read($fileContent);
+            $original = $this->imageManager->decode($fileContent);
         } catch (Throwable $e) {
             Log::error('Failed to read image file for variants', [
                 'person_id'   => $this->person->id,
@@ -515,7 +533,7 @@ final class PersonPhotos
             try {
                 $image = clone $original;
 
-                $image->scaleDown(
+                $image->scale(
                     width: $dimensions['width'],
                     height: $dimensions['height']
                 );
@@ -529,7 +547,7 @@ final class PersonPhotos
 
                 $this->photosDisk->put(
                     $path,
-                    $image->toWebp(quality: $quality)
+                    (string) $image->encodeUsingFormat(Format::WEBP, quality: $quality)
                 );
 
                 $savedAny = true;
@@ -607,7 +625,7 @@ final class PersonPhotos
         }
 
         try {
-            $image->place($path, 'bottom-left', 5, 5);
+            $image->insert($path, 5, 5, Alignment::BOTTOM_LEFT);
         } catch (Throwable $e) {
             Log::warning('Failed to apply watermark', [
                 'person_id'      => $this->person->id,
@@ -652,14 +670,28 @@ final class PersonPhotos
      * Centralizes file reading logic.
      *
      * @return string File content as binary string
+     *
+     * @throws RuntimeException If file cannot be read
      */
     private function getFileContent(UploadedFile|string $photo): string
     {
         if ($photo instanceof UploadedFile) {
-            return file_get_contents($photo->getRealPath());
+            $content = file_get_contents($photo->getRealPath());
+
+            if ($content === false) {
+                throw new RuntimeException("Failed to read uploaded file: {$photo->getClientOriginalName()}");
+            }
+
+            return $content;
         }
 
-        return file_get_contents($photo);
+        $content = file_get_contents($photo);
+
+        if ($content === false) {
+            throw new RuntimeException("Failed to read file: {$photo}");
+        }
+
+        return $content;
     }
 
     /**
@@ -669,12 +701,18 @@ final class PersonPhotos
      */
     private function getFileExtension(UploadedFile|string $photo): string
     {
+        $allowedExtensions = config('app.upload_photo_validation.extensions');
+
         if ($photo instanceof UploadedFile) {
-            return $photo->getClientOriginalExtension() ?: $photo->extension() ?: 'jpg';
+            $extension = mb_strtolower($photo->getClientOriginalExtension() ?: $photo->extension() ?: 'jpg');
+
+            return in_array($extension, $allowedExtensions) ? $extension : 'jpg';
         }
 
-        if (is_string($photo) && file_exists($photo)) {
-            return pathinfo($photo, PATHINFO_EXTENSION) ?: 'jpg';
+        if (file_exists($photo)) {
+            $extension = mb_strtolower(pathinfo($photo, PATHINFO_EXTENSION) ?: 'jpg');
+
+            return in_array($extension, $allowedExtensions) ? $extension : 'jpg';
         }
 
         return 'jpg';
@@ -690,5 +728,75 @@ final class PersonPhotos
         return ! str_contains($basename, '_large.')
             && ! str_contains($basename, '_medium.')
             && ! str_contains($basename, '_small.');
+    }
+
+    /**
+     * Validate that uploaded file is a genuine image
+     */
+    private function isValidImage(UploadedFile $file): bool
+    {
+        // Check 1: Verify MIME type matches config
+        $mimeType     = $file->getMimeType();
+        $allowedMimes = array_keys(config('app.upload_photo_accept'));
+
+        if (! in_array($mimeType, $allowedMimes)) {
+            Log::warning('Invalid MIME type detected', [
+                'person_id' => $this->person->id,
+                'file'      => $file->getClientOriginalName(),
+                'mime'      => $mimeType,
+            ]);
+
+            return false;
+        }
+
+        // Check 2: Verify file is actually an image using getimagesize
+        try {
+            $imageInfo = @getimagesize($file->getRealPath());
+            if ($imageInfo === false) {
+                Log::warning('File failed getimagesize validation', [
+                    'person_id' => $this->person->id,
+                    'file'      => $file->getClientOriginalName(),
+                ]);
+
+                return false;
+            }
+
+            // Verify the image type matches expected types
+            $allowedImageTypes = config('app.upload_photo_validation.image_types');
+
+            if (! in_array($imageInfo[2], $allowedImageTypes)) {
+                Log::warning('Image type not allowed', [
+                    'person_id' => $this->person->id,
+                    'file'      => $file->getClientOriginalName(),
+                    'type'      => $imageInfo[2],
+                ]);
+
+                return false;
+            }
+        } catch (Exception $e) {
+            Log::error('Error validating image', [
+                'person_id' => $this->person->id,
+                'file'      => $file->getClientOriginalName(),
+                'error'     => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+
+        // Check 3: Verify extension matches allowed types
+        $extension         = mb_strtolower($file->getClientOriginalExtension());
+        $allowedExtensions = config('app.upload_photo_validation.extensions');
+
+        if (! in_array($extension, $allowedExtensions)) {
+            Log::warning('Invalid file extension', [
+                'person_id' => $this->person->id,
+                'file'      => $file->getClientOriginalName(),
+                'extension' => $extension,
+            ]);
+
+            return false;
+        }
+
+        return true;
     }
 }

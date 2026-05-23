@@ -35,7 +35,7 @@
             <!-- Logo Section -->
             <div class="flex justify-center md:justify-start">
                 <a href="{{ route('home') }}" aria-label="Go to Home" title="Home">
-                    <x-svg.genealogy class="size-48 fill-dark dark:fill-neutral-400 hover:fill-primary-300 dark:hover:fill-primary-300" alt="Genealogy Logo" />
+                    <x-svg.genealogy class="size-48 dark:fill-neutral-400 hover:fill-primary-300 dark:hover:fill-primary-300" alt="Genealogy Logo" />
                 </a>
             </div>
 
@@ -81,7 +81,7 @@
                 <h6 class="flex justify-center mb-4 font-semibold uppercase md:justify-start">{{ __('app.contact') }}</h6>
                 <x-hr.narrow class="w-48 h-1 my-4 bg-gray-100 border-0 rounded-sm max-md:mx-auto dark:bg-gray-700" />
                 <p class="flex items-center justify-center mb-4 md:justify-start">
-                    <x-ts-icon icon="tabler.home" class="inline-block size-5 mr-3" />
+                    <x-ts-icon icon="home" class="inline-block size-5 mr-3" />
                     New York, NY 10012, US
                 </p>
                 <p class="flex items-center justify-center mb-4 md:justify-start">

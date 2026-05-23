@@ -19,6 +19,7 @@ class ZipImporter
 
     private ?string $gedcomContent = null;
 
+    /** @var array<string, string> */
     private array $mediaFiles = [];
 
     public function __construct()
@@ -60,8 +61,71 @@ class ZipImporter
                 mkdir($this->tempPath, 0755, true);
             }
 
-            // Extract all files
-            $zip->extractTo($this->tempPath);
+            // Resolve the canonical temp path once so every entry can be checked against it.
+            // realpath() requires the directory to already exist, which it does at this point.
+            $canonicalTempPath = realpath($this->tempPath);
+
+            if ($canonicalTempPath === false) {
+                throw new Exception('Could not resolve temporary extraction path.');
+            }
+
+            // Extract entries one-by-one and validate each destination path before writing.
+            // ZipArchive::extractTo() is intentionally avoided here because it blindly
+            // follows path components inside entry names (e.g. "../../public/shell.php"),
+            // which allows a malicious archive to write files anywhere on the filesystem
+            // — a vulnerability known as Zip Slip (CWE-22 / path traversal).
+            $count = $zip->count();
+
+            for ($i = 0; $i < $count; $i++) {
+                $entryName = $zip->getNameIndex($i);
+
+                if ($entryName === false) {
+                    continue;
+                }
+
+                // Build the destination path and resolve it to its canonical form.
+                // realpath() on a non-existent path returns false, so we resolve the
+                // parent directory and append the sanitised filename instead.
+                $entryBasename = basename($entryName);
+
+                // Skip macOS resource-fork entries and other hidden artefacts.
+                if ($entryBasename === '' || str_starts_with($entryBasename, '.')) {
+                    continue;
+                }
+
+                // We intentionally flatten the archive: all files land directly in
+                // tempPath regardless of any subdirectory structure inside the ZIP.
+                // This is safe and sufficient — GEDCOM files and their media do not
+                // rely on relative subdirectory paths at import time.
+                $destination = $canonicalTempPath . DIRECTORY_SEPARATOR . $entryBasename;
+
+                // Final guard: after joining, confirm the resolved destination is still
+                // inside tempPath. str_starts_with on the canonicalised path is safe
+                // because realpath() has already collapsed any ".." components.
+                $resolvedDestination = realpath(dirname($destination));
+
+                if ($resolvedDestination === false || ! str_starts_with($resolvedDestination . DIRECTORY_SEPARATOR, $canonicalTempPath . DIRECTORY_SEPARATOR)) {
+                    Log::warning('GEDCOM ZIP: Skipping entry with path traversal attempt', [
+                        'entry' => $entryName,
+                    ]);
+                    continue;
+                }
+
+                // Skip directories — we only need files.
+                if (str_ends_with($entryName, '/')) {
+                    continue;
+                }
+
+                $content = $zip->getFromIndex($i);
+
+                if ($content === false) {
+                    Log::warning('GEDCOM ZIP: Could not read entry', ['entry' => $entryName]);
+                    continue;
+                }
+
+                file_put_contents($destination, $content);
+            }
+
             $zip->close();
 
             // Find GEDCOM file and media files
@@ -85,6 +149,8 @@ class ZipImporter
 
     /**
      * Get media files mapping (GEDCOM reference => actual file path)
+     *
+     * @return array<string, string>
      */
     public function getMediaFiles(): array
     {
@@ -97,7 +163,7 @@ class ZipImporter
     public function cleanup(): void
     {
         if (is_dir($this->tempPath)) {
-            // $this->deleteDirectory($this->tempPath);
+            $this->deleteDirectory($this->tempPath);
         }
     }
 
@@ -120,8 +186,14 @@ class ZipImporter
 
             // Find GEDCOM file
             if (in_array($extension, ['ged', 'gedcom'])) {
-                $this->gedcomContent = file_get_contents($filePath);
-                Log::info('GEDCOM file found in ZIP', ['file' => $file->getFilename()]);
+                $content = file_get_contents($filePath);
+
+                if ($content === false) {
+                    throw new Exception("Failed to read GEDCOM file: {$filePath}");
+                }
+
+                $this->gedcomContent = $content;
+                Log::debug('GEDCOM file found in ZIP', ['file' => $file->getFilename()]);
             }
 
             // Find media files (images)
@@ -141,7 +213,7 @@ class ZipImporter
             throw new Exception('No GEDCOM file found in ZIP archive');
         }
 
-        Log::info('ZIP extraction complete', [
+        Log::debug('ZIP extraction complete', [
             'media_files_count' => count($this->mediaFiles),
             'gedcom_size'       => mb_strlen($this->gedcomContent),
         ]);

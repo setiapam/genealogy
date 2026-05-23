@@ -16,21 +16,49 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Korridor\LaravelHasManyMerged\HasManyMerged;
 use Korridor\LaravelHasManyMerged\HasManyMergedRelation;
 use Override;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Models\Activity;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
+/**
+ * @property int $id
+ * @property int $team_id
+ * @property string|null $firstname
+ * @property string|null $surname
+ * @property string|null $birthname
+ * @property string|null $nickname
+ * @property string|null $sex
+ * @property int|null $gender_id
+ * @property int|null $father_id
+ * @property int|null $mother_id
+ * @property int|null $parents_id
+ * @property string|null $dob
+ * @property int|null $yob
+ * @property string|null $pob
+ * @property string|null $dod
+ * @property int|null $yod
+ * @property string|null $pod
+ * @property-read string|null $name
+ * @property-read string|null $birth_formatted
+ * @property-read string|null $death_formatted
+ * @property-read int|null $age
+ * @property-read string|null $birthYear
+ * @property-read string|null $deathYear
+ * @property-read Collection<int, Person> $children
+ * @property-read Collection<int, Couple> $couples
+ * @property-read Collection<int, PersonEvent> $events
+ */
 final class Person extends Model implements HasMedia
 {
+    /** @use HasFactory<\Database\Factories\PersonFactory> */
     use HasFactory;
+
     use HasManyMergedRelation;
     use InteractsWithMedia;
     use LogsActivity;
@@ -39,7 +67,7 @@ final class Person extends Model implements HasMedia
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'firstname',
@@ -73,10 +101,12 @@ final class Person extends Model implements HasMedia
     /**
      * The accessors to append to the model's array form.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $appends = [
         'name',
+        'birth_formatted',
+        'death_formatted',
     ];
 
     /* -------------------------------------------------------------------------------------------- */
@@ -110,17 +140,18 @@ final class Person extends Model implements HasMedia
                 'team.name',
             ])
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
+            ->dontLogEmptyChanges();
     }
 
     public function tapActivity(Activity $activity, string $eventName): void
     {
-        $activity->team_id = auth()->user()?->currentTeam?->id ?? null;
+        $activity->team_id = auth()->user()?->currentTeam->id ?? null;
     }
 
     /* -------------------------------------------------------------------------------------------- */
     // Local Scopes
     /* -------------------------------------------------------------------------------------------- */
+    /** @param Builder<self> $query */
     #[Scope]
     public function scopeSearch(Builder $query, string $searchString): void
     {
@@ -161,6 +192,7 @@ final class Person extends Model implements HasMedia
             });
     }
 
+    /** @param Builder<self> $query */
     #[Scope]
     public function scopeYoungerThan(Builder $query, ?string $dob, ?int $yob): void
     {
@@ -193,6 +225,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @param Builder<self> $query */
     #[Scope]
     public function scopeOlderThan(Builder $query, ?string $dob, ?int $yob): void
     {
@@ -225,6 +258,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @param Builder<self> $query */
     #[Scope]
     public function scopePartnerOffset(Builder $query, ?string $dob, ?int $yob, int $offset = 40): void
     {
@@ -265,6 +299,40 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /**
+     * Scope to find persons with similar names within a team.
+     *
+     * @param  Builder<Person>  $query
+     * @param  array<string|null>  $terms
+     * @return Builder<Person>
+     */
+    #[Scope]
+    public function scopeSimilarTo(Builder $query, ?int $teamId, array $terms): Builder
+    {
+        $terms = array_filter($terms);
+
+        if (empty($terms)) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        if ($teamId !== null) {
+            $query->where('team_id', $teamId);
+        }
+
+        return $query
+            ->where(function ($q) use ($terms): void {
+                foreach ($terms as $term) {
+                    $like = '%' . $term . '%';
+                    $q->orWhere('firstname', 'like', $like)
+                        ->orWhere('surname', 'like', $like)
+                        ->orWhere('birthname', 'like', $like)
+                        ->orWhere('nickname', 'like', $like);
+                }
+            })
+            ->orderBy('surname')
+            ->orderBy('firstname');
+    }
+
     /* -------------------------------------------------------------------------------------------- */
     // Checks
     /* -------------------------------------------------------------------------------------------- */
@@ -292,47 +360,55 @@ final class Person extends Model implements HasMedia
     // Relations
     /* -------------------------------------------------------------------------------------------- */
     /* returns TEAM (1 Team) based on team_id */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
     /* lookup table */
+    /** @return BelongsTo<Gender, $this> */
     public function gender(): BelongsTo
     {
         return $this->belongsTo(Gender::class);
     }
 
     /* returns FATHER (1 Person) based on father_id */
+    /** @return BelongsTo<Person, $this> */
     public function father(): BelongsTo
     {
         return $this->belongsTo(self::class);
     }
 
     /* returns MOTHER (1 Person) based on mother_id */
+    /** @return BelongsTo<Person, $this> */
     public function mother(): BelongsTo
     {
         return $this->belongsTo(self::class);
     }
 
     /* returns PARENTS (1 Couple) based on parents_id */
+    /** @return BelongsTo<Couple, $this> */
     public function parents(): BelongsTo
     {
         return $this->belongsTo(Couple::class)->with(['person1', 'person2']);
     }
 
     /* returns OWN NATURAL CHILDREN (n Person) based on father_id OR mother_id, ordered by dob */
+    /** @return HasManyMerged<Person, Person> */
     public function children(): HasManyMerged
     {
         return $this->hasManyMerged(self::class, ['father_id', 'mother_id'])->orderBy('dob');
     }
 
+    /** @return HasManyMerged<Person, Person> */
     public function children_with_children(): HasManyMerged // only used in family chart
     {
         return $this->hasManyMerged(self::class, ['father_id', 'mother_id'])->with('children')->orderBy('dob');
     }
 
     /* returns ALL NATURAL CHILDREN (n Person) (OWN + CURRENT PARTNER), ordered by type, birthyear */
+    /** @return Collection<int, Person> */
     public function childrenNaturalAll(): Collection
     {
         $children_natural = $this->children;
@@ -346,6 +422,7 @@ final class Person extends Model implements HasMedia
     }
 
     /* returns ALL PARTNERS (n Person) related to the person, ordered by date_start */
+    /** @return Collection<int, Person> */
     public function getPartnersAttribute(): Collection
     {
         if (! array_key_exists('partners', $this->relations)) {
@@ -380,12 +457,14 @@ final class Person extends Model implements HasMedia
     }
 
     /* returns ALL PARTNERSHIPS (n Couple) related to the person, ordered by date_start */
+    /** @return HasManyMerged<Couple, Person> */
     public function couples(): HasManyMerged
     {
         return $this->hasManyMerged(Couple::class, ['person1_id', 'person2_id'])->with(['person1', 'person2']);
     }
 
     /* returns ALL METADATA (n PersonMetadata) related to the person */
+    /** @return HasMany<PersonMetadata, $this> */
     public function metadata(): HasMany
     {
         return $this->hasMany(PersonMetadata::class);
@@ -398,12 +477,14 @@ final class Person extends Model implements HasMedia
             return null;
         }
 
+        /** @var PersonMetadata|null $metadata */
         $metadata = $this->metadata->firstWhere('key', $key);
 
         return $metadata ? $metadata->value : null;
     }
 
     /* updates, deletes if empty or creates 1 to n METADATA related to the person */
+    /** @param Collection<string, mixed> $personMetadata */
     public function updateMetadata(Collection $personMetadata): void
     {
         // First, delete any existing metadata where the value is empty
@@ -434,6 +515,7 @@ final class Person extends Model implements HasMedia
     }
 
     /* returns ALL SIBLINGS (n Person) related to the person, either through father_id, mother_id or parents_id ordered by type, birthyear */
+    /** @return Collection<int, Person> */
     public function siblings(bool $withChildren = false): Collection
     {
         // Early return if no parent information
@@ -472,6 +554,139 @@ final class Person extends Model implements HasMedia
     }
 
     /* -------------------------------------------------------------------------------------------- */
+    // Relations for Person Events
+    /* -------------------------------------------------------------------------------------------- */
+    /* returns ALL EVENTS (n PersonEvent) related to the person, ordered by date */
+    /** @return HasMany<PersonEvent, $this> */
+    public function events(): HasMany
+    {
+        return $this->hasMany(PersonEvent::class)->orderByRaw('COALESCE(date, CONCAT(year, "-01-01"))');
+    }
+
+    /* returns a TIMELINE of all person events including birth and death (person and children), and relationships, ordered by date */
+    /** @return Collection<int, array<string, mixed>> */
+    public function timeline(): Collection
+    {
+        $timeline = collect();
+
+        // Birth event
+        if ($this->dob || $this->yob) {
+            $timeline->push([
+                'type'           => 'birth',
+                'type_label'     => __('personevents.birth'),
+                'date'           => $this->dob,
+                'year'           => $this->yob ?? ($this->dob ? (int) Carbon::parse($this->dob)->format('Y') : null),
+                'date_formatted' => $this->birth_formatted,
+                'place'          => $this->pob,
+                'sort_date'      => $this->dob ?? ($this->yob ? "{$this->yob}-01-01" : null),
+                'color'          => 'green',
+                'icon'           => 'balloon',
+            ]);
+        }
+
+        // Death event
+        if ($this->dod || $this->yod) {
+            $timeline->push([
+                'type'           => 'death',
+                'type_label'     => __('personevents.death'),
+                'date'           => $this->dod,
+                'year'           => $this->yod ?? ($this->dod ? (int) Carbon::parse($this->dod)->format('Y') : null),
+                'date_formatted' => $this->death_formatted,
+                'place'          => $this->pod,
+                'sort_date'      => $this->dod ?? ($this->yod ? "{$this->yod}-01-01" : null),
+                'color'          => 'green',
+                'icon'           => 'grave-2',
+            ]);
+        }
+
+        // Relationship events
+        foreach ($this->couples as $couple) {
+            if ($couple->date_start) {
+                $timeline->push([
+                    'type'           => $couple->is_married ? 'marriage' : 'relationship',
+                    'type_label'     => $couple->is_married ? __('personevents.marriage') : __('personevents.relationship'),
+                    'date'           => $couple->date_start,
+                    'year'           => (int) Carbon::parse($couple->date_start)->format('Y'),
+                    'date_formatted' => $couple->date_start_formatted,
+                    'partner'        => $couple->person1_id === $this->id ? $couple->person2->name : $couple->person1->name,
+                    'sort_date'      => $couple->date_start,
+                    'color'          => 'pink',
+                    'icon'           => 'hearts',
+                ]);
+            }
+
+            if ($couple->date_end && $couple->has_ended) {
+                $timeline->push([
+                    'type'           => 'relationship_end',
+                    'type_label'     => $couple->is_married ? __('personevents.marriage_end') : __('personevents.relationship_end'),
+                    'date'           => $couple->date_end,
+                    'year'           => (int) Carbon::parse($couple->date_end)->format('Y'),
+                    'date_formatted' => Carbon::parse($couple->date_end)->timezone(session('timezone') ?? 'UTC')->isoFormat('LL'),
+                    'partner'        => $couple->person1_id === $this->id ? $couple->person2->name : $couple->person1->name,
+                    'sort_date'      => $couple->date_end,
+                    'color'          => 'pink',
+                    'icon'           => 'hearts-off',
+                ]);
+            }
+        }
+
+        // Children birth and death events (as parent)
+        foreach ($this->children as $child) {
+            if ($child->dob || $child->yob) {
+                $timeline->push([
+                    'type'           => 'child_birth',
+                    'type_label'     => __('personevents.child_birth'),
+                    'date'           => $child->dob,
+                    'year'           => $child->yob ?? ($child->dob ? (int) Carbon::parse($child->dob)->format('Y') : null),
+                    'date_formatted' => $child->birth_formatted,
+                    'child'          => $child->name,
+                    'place'          => $child->pob,
+                    'sort_date'      => $child->dob ?? ($child->yob ? "{$child->yob}-01-01" : null),
+                    'color'          => 'blue',
+                    'icon'           => 'balloon',
+                ]);
+            }
+
+            if ($child->dod || $child->yod) {
+                $timeline->push([
+                    'type'           => 'child_death',
+                    'type_label'     => __('personevents.child_death'),
+                    'date'           => $child->dod,
+                    'year'           => $child->yod ?? ($child->dod ? (int) Carbon::parse($child->dod)->format('Y') : null),
+                    'date_formatted' => $child->death_formatted,
+                    'child'          => $child->name,
+                    'place'          => $child->pod,
+                    'sort_date'      => $child->dod ?? ($child->yod ? "{$child->yod}-01-01" : null),
+                    'color'          => 'blue',
+                    'icon'           => 'grave-2',
+                ]);
+            }
+        }
+
+        // Custom events (baptism, burial, military, etc.)
+        foreach ($this->events as $event) {
+            $timeline->push([
+                'type'           => $event->type,
+                'type_label'     => $event->type_label,
+                'date'           => $event->date,
+                'year'           => $event->year,
+                'date_formatted' => $event->date_formatted,
+                'place'          => $event->address ?? ($event->place ? $event->place : null),
+                'description'    => $event->description,
+                'sort_date'      => $event->date ?? ($event->year ? "{$event->year}-01-01" : null),
+                'color'          => 'gray',
+                'icon'           => 'calendar-week',
+            ]);
+        }
+
+        // Sort by date and return
+        return $timeline
+            ->filter(fn ($event) => $event['sort_date'] !== null)
+            ->sortBy('sort_date')
+            ->values();
+    }
+
+    /* -------------------------------------------------------------------------------------------- */
     // Scopes (global)
     /* -------------------------------------------------------------------------------------------- */
     #[Override]
@@ -479,11 +694,17 @@ final class Person extends Model implements HasMedia
     {
         // Team scope
         self::addGlobalScope('team', function (Builder $builder): void {
-            if (Auth::guest() || auth()->user()->is_developer) {
+            $user = auth()->user();
+
+            if (! $user || $user->is_developer) {
                 return;
             }
 
-            $builder->where('people.team_id', auth()->user()->currentTeam->id);
+            $currentTeam = $user->currentTeam;
+
+            if ($currentTeam) {
+                $builder->where('people.team_id', $currentTeam->id);
+            }
         });
 
         // Handle force deletes (permanent deletion only)
@@ -499,15 +720,17 @@ final class Person extends Model implements HasMedia
     /* -------------------------------------------------------------------------------------------- */
     // Accessors & Mutators
     /* -------------------------------------------------------------------------------------------- */
+    /** @return Attribute<string, never> */
     protected function name(): Attribute
     {
-        return Attribute::get(function (): ?string {
+        return Attribute::get(function (): string {
             $name = Str::of("{$this->firstname} {$this->surname}")->trim()->value();
 
-            return $name === '' ? null : $name;
+            return $name === '' ? '' : $name;
         });
     }
 
+    /** @return Attribute<?int, never> */
     protected function age(): Attribute
     {
         return Attribute::make(get: function (): ?int {
@@ -541,6 +764,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<?Carbon, never> */
     protected function nextBirthday(): Attribute
     {
         return Attribute::make(get: function (): ?Carbon {
@@ -555,6 +779,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<?int, never> */
     protected function nextBirthdayAge(): Attribute
     {
         return Attribute::make(get: function (): ?int {
@@ -562,6 +787,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<?int, never> */
     protected function nextBirthdayRemainingDays(): Attribute
     {
         return Attribute::make(get: function (): ?int {
@@ -584,6 +810,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<?string, never> */
     protected function lifetime(): Attribute
     {
         return Attribute::make(get: function (): ?string {
@@ -601,7 +828,7 @@ final class Person extends Model implements HasMedia
             } elseif ($this->yob) {
                 if ($this->dod) {
                     // deceased based on yob & dod
-                    $lifetime = $this->yod . ' - ' . Carbon::parse($this->dod)->format('Y');
+                    $lifetime = $this->yob . ' - ' . Carbon::parse($this->dod)->format('Y');
                 } elseif ($this->yod) {
                     // deceased based on yob & yod
                     $lifetime = $this->yob . ' - ' . $this->yod;
@@ -617,6 +844,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<?string, never> */
     protected function birthYear(): Attribute
     {
         return Attribute::make(get: function (): ?string {
@@ -632,6 +860,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<?string, never> */
     protected function deathYear(): Attribute
     {
         return Attribute::make(get: function (): ?string {
@@ -647,9 +876,10 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<string, never> */
     protected function birthFormatted(): Attribute
     {
-        return Attribute::make(get: function (): ?string {
+        return Attribute::make(get: function (): string {
             if ($this->dob) {
                 $birth = Carbon::parse($this->dob)->timezone(session('timezone') ?? 'UTC')->isoFormat('LL');
             } elseif ($this->yob) {
@@ -662,9 +892,10 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<string, never> */
     protected function deathFormatted(): Attribute
     {
-        return Attribute::make(get: function (): ?string {
+        return Attribute::make(get: function (): string {
             if ($this->dod) {
                 $dead = Carbon::parse($this->dod)->timezone(session('timezone') ?? 'UTC')->isoFormat('LL');
             } elseif ($this->yod) {
@@ -677,6 +908,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<?string, never> */
     protected function address(): Attribute
     {
         return Attribute::make(get: function (): ?string {
@@ -696,6 +928,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<?string, never> */
     protected function addressGoogle(): Attribute
     {
         return Attribute::make(get: function (): ?string {
@@ -718,6 +951,7 @@ final class Person extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<?string, never> */
     protected function cemeteryGoogle(): Attribute
     {
         return Attribute::make(get: function (): ?string {
@@ -746,12 +980,14 @@ final class Person extends Model implements HasMedia
     /* -------------------------------------------------------------------------------------------- */
     // Optimized relationship methods for siblings
     /* -------------------------------------------------------------------------------------------- */
+    /** @return HasMany<Person, $this> */
     private function fullSiblings(): HasMany
     {
         return $this->hasMany(self::class, 'parents_id', 'parents_id')
             ->where('id', '!=', $this->id);
     }
 
+    /** @return HasMany<Person, $this> */
     private function halfSiblingsFather(): HasMany
     {
         return $this->hasMany(self::class, 'father_id', 'father_id')
@@ -759,6 +995,7 @@ final class Person extends Model implements HasMedia
             ->whereNull('parents_id');
     }
 
+    /** @return HasMany<Person, $this> */
     private function halfSiblingsMother(): HasMany
     {
         return $this->hasMany(self::class, 'mother_id', 'mother_id')

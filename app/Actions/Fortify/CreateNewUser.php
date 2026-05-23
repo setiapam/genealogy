@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Jetstream\Jetstream;
+use RuntimeException;
 
 final class CreateNewUser implements CreatesNewUsers
 {
@@ -27,8 +28,8 @@ final class CreateNewUser implements CreatesNewUsers
             'firstname' => ['nullable', 'string', 'max:255'],
             'surname'   => ['required', 'string', 'max:255'],
             'email'     => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'language'  => ['required', Rule::in(array_values(config('app.available_locales')))],
-            'timezone'  => ['required', Rule::in(array_values(timezone_identifiers_list()))],
+            'language'  => ['required', Rule::in(config('app.available_locales'))],
+            'timezone'  => ['required', Rule::in(timezone_identifiers_list())],
             'password'  => $this->passwordRules(),
             'terms'     => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
@@ -50,14 +51,20 @@ final class CreateNewUser implements CreatesNewUsers
      */
     protected function createTeam(User $user): void
     {
+        /** @var Team $team */
         $team = $user->ownedTeams()->save(Team::forceCreate([
             'user_id'       => $user->id,
             'name'          => 'Team ' . $user->name,
             'personal_team' => true,
         ]));
 
+        if (! $team) {
+            throw new RuntimeException('Failed to create team for user');
+        }
+
         // Set the current_team_id to the newly created personal team
-        $user->current_team_id = $team->id;
-        $user->save();
+        $user->forceFill([
+            'current_team_id' => $team->id,
+        ])->save();
     }
 }

@@ -256,6 +256,9 @@ class MigratePhotos extends Command
         return ! $photos096Exists && ! $photos384Exists;
     }
 
+    /**
+     * @return array<int, string>
+     */
     private function getAllFiles(string $dir): array
     {
         $files = [];
@@ -306,8 +309,9 @@ class MigratePhotos extends Command
             return;
         }
 
+        $globResult     = glob("{$folderPath}/*");
         $remainingFiles = array_filter(
-            glob("{$folderPath}/*"),
+            $globResult !== false ? $globResult : [],
             fn ($file) => basename($file) !== '.gitignore'
         );
 
@@ -336,7 +340,13 @@ class MigratePhotos extends Command
 
     private function deleteDirectory(string $dir): void
     {
-        $items = array_merge(glob("{$dir}/*"), glob("{$dir}/.*"));
+        $globVisible = glob("{$dir}/*");
+        $globHidden  = glob("{$dir}/.*");
+
+        $items = array_merge(
+            $globVisible !== false ? $globVisible : [],
+            $globHidden !== false ? $globHidden : []
+        );
 
         foreach ($items as $item) {
             $basename = basename($item);

@@ -2,11 +2,11 @@
 
 # Genealogy
 
-![](https://img.shields.io/badge/PHP-8.3-informational?style=flat&logo=php&color=4f5b93)
+![](https://img.shields.io/badge/PHP-8.4-informational?style=flat&logo=php&color=4f5b93)
 ![](https://img.shields.io/badge/Laravel-12-informational?style=flat&logo=laravel&color=ef3b2d)
 ![](https://img.shields.io/badge/Alpine.js-3-informational?style=flat&logo=Alpine.js&color=8BC0D0)
-![](https://img.shields.io/badge/Livewire-3.6-informational?style=flat&logo=Livewire&color=fb70a9)
-![](https://img.shields.io/badge/Filament-4.0-informational?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgeG1sbnM6dj0iaHR0cHM6Ly92ZWN0YS5pby9uYW5vIj48cGF0aCBkPSJNMCAwaDQ4djQ4SDBWMHoiIGZpbGw9IiNmNGIyNWUiLz48cGF0aCBkPSJNMjggN2wtMSA2LTMuNDM3LjgxM0wyMCAxNWwtMSAzaDZ2NWgtN2wtMyAxOEg4Yy41MTUtNS44NTMgMS40NTQtMTEuMzMgMy0xN0g4di01bDUtMSAuMjUtMy4yNUMxNCAxMSAxNCAxMSAxNS40MzggOC41NjMgMTkuNDI5IDYuMTI4IDIzLjQ0MiA2LjY4NyAyOCA3eiIgZmlsbD0iIzI4MjQxZSIvPjxwYXRoIGQ9Ik0zMCAxOGg0YzIuMjMzIDUuMzM0IDIuMjMzIDUuMzM0IDEuMTI1IDguNUwzNCAyOWMtLjE2OCAzLjIwOS0uMTY4IDMuMjA5IDAgNmwtMiAxIDEgM2gtNXYyaC0yYy44NzUtNy42MjUuODc1LTcuNjI1IDItMTFoMnYtMmgtMnYtMmwyLTF2LTQtM3oiIGZpbGw9IiMyYTIwMTIiLz48cGF0aCBkPSJNMzUuNTYzIDYuODEzQzM4IDcgMzggNyAzOSA4Yy4xODggMi40MzguMTg4IDIuNDM4IDAgNWwtMiAyYy0yLjYyNS0uMzc1LTIuNjI1LS4zNzUtNS0xLS42MjUtMi4zNzUtLjYyNS0yLjM3NS0xLTUgMi0yIDItMiA0LjU2My0yLjE4N3oiIGZpbGw9IiM0MDM5MzEiLz48cGF0aCBkPSJNMzAgMThoNGMyLjA1NSA1LjMxOSAyLjA1NSA1LjMxOSAxLjgxMyA4LjMxM0wzNSAyOGwtMyAxdi0ybC00IDF2LTJsMi0xdi00LTN6IiBmaWxsPSIjMzEyODFlIi8+PHBhdGggZD0iTTI5IDI3aDN2MmgydjJoLTJ2MmwtNC0xdi0yaDJsLTEtM3oiIGZpbGw9IiMxNTEzMTAiLz48cGF0aCBkPSJNMzAgMThoNHYzaC0ydjJsLTMgMSAxLTZ6IiBmaWxsPSIjNjA0YjMyIi8+PC9zdmc+&&color=fdae4b&link=https://filamentphp.com)
+![](https://img.shields.io/badge/Livewire-4.0-informational?style=flat&logo=Livewire&color=fb70a9)
+![](https://img.shields.io/badge/Filament-5.0-informational?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgeG1sbnM6dj0iaHR0cHM6Ly92ZWN0YS5pby9uYW5vIj48cGF0aCBkPSJNMCAwaDQ4djQ4SDBWMHoiIGZpbGw9IiNmNGIyNWUiLz48cGF0aCBkPSJNMjggN2wtMSA2LTMuNDM3LjgxM0wyMCAxNWwtMSAzaDZ2NWgtN2wtMyAxOEg4Yy41MTUtNS44NTMgMS40NTQtMTEuMzMgMy0xN0g4di01bDUtMSAuMjUtMy4yNUMxNCAxMSAxNCAxMSAxNS40MzggOC41NjMgMTkuNDI5IDYuMTI4IDIzLjQ0MiA2LjY4NyAyOCA3eiIgZmlsbD0iIzI4MjQxZSIvPjxwYXRoIGQ9Ik0zMCAxOGg0YzIuMjMzIDUuMzM0IDIuMjMzIDUuMzM0IDEuMTI1IDguNUwzNCAyOWMtLjE2OCAzLjIwOS0uMTY4IDMuMjA5IDAgNmwtMiAxIDEgM2gtNXYyaC0yYy44NzUtNy42MjUuODc1LTcuNjI1IDItMTFoMnYtMmgtMnYtMmwyLTF2LTQtM3oiIGZpbGw9IiMyYTIwMTIiLz48cGF0aCBkPSJNMzUuNTYzIDYuODEzQzM4IDcgMzggNyAzOSA4Yy4xODggMi40MzguMTg4IDIuNDM4IDAgNWwtMiAyYy0yLjYyNS0uMzc1LTIuNjI1LS4zNzUtNS0xLS42MjUtMi4zNzUtLjYyNS0yLjM3NS0xLTUgMi0yIDItMiA0LjU2My0yLjE4N3oiIGZpbGw9IiM0MDM5MzEiLz48cGF0aCBkPSJNMzAgMThoNGMyLjA1NSA1LjMxOSAyLjA1NSA1LjMxOSAxLjgxMyA4LjMxM0wzNSAyOGwtMyAxdi0ybC00IDF2LTJsMi0xdi00LTN6IiBmaWxsPSIjMzEyODFlIi8+PHBhdGggZD0iTTI5IDI3aDN2MmgydjJoLTJ2MmwtNC0xdi0yaDJsLTEtM3oiIGZpbGw9IiMxNTEzMTAiLz48cGF0aCBkPSJNMzAgMThoNHYzaC0ydjJsLTMgMSAxLTZ6IiBmaWxsPSIjNjA0YjMyIi8+PC9zdmc+&&color=fdae4b&link=https://filamentphp.com)
 
 ![Latest Stable Version](https://img.shields.io/github/release/MGeurts/genealogy)
 
@@ -17,8 +17,8 @@
 
 <b>Genealogy</b> is a free and open-source family tree PHP application to record family members and their relationships, build with Laravel 12.
 
-<img src="https://genealogy.kreaweb.be/img/help/genealogy-000a.webp" class="rounded" alt="Genealogy-000a"/>
-<img src="https://genealogy.kreaweb.be/img/help/genealogy-020a.webp" class="rounded" alt="Genealogy-020"/>
+<img src="https://genealogy.kreaweb.be/img/help/genealogy-000.webp" class="rounded" alt="Genealogy-000"/>
+<img src="https://genealogy.kreaweb.be/img/help/genealogy-020.webp" class="rounded" alt="Genealogy-020"/>
 
 This <b>TallStack</b> application is build using :
 
@@ -28,8 +28,8 @@ This <b>TallStack</b> application is build using :
     <li><a href="https://livewire.laravel.com/" target="_blank">Livewire</a> 4</li>
     <li><a href="https://alpinejs.dev/" target="_blank">Alpine.js</a> 3</li>
     <li><a href="https://tailwindcss.com/" target="_blank">Tailwind CSS</a> 4</li>
-    <li><a href="https://tallstackui.com//" target="_blank">TallStackUI</a> 2 (featuring <a href="https://tabler.io/icons" target="_blank">Tabler Icons</a>)</li>
-    <li><a href="https://filamentphp.com//" target="_blank">Laravel Filament</a> 4 (only <a href="https://filamentphp.com/docs/4.x/tables/overview/" target="_blank">Table Builder</a>)</li>
+    <li><a href="https://tallstackui.com//" target="_blank">TallStackUI</a> 3 (featuring <a href="https://tabler.io/icons" target="_blank">Tabler Icons</a>)</li>
+    <li><a href="https://filamentphp.com//" target="_blank">Laravel Filament</a> 5 (only <a href="https://filamentphp.com/docs/5.x/tables/overview" target="_blank">Table Builder</a>)</li>
 </ul>
 
 <img src="https://genealogy.kreaweb.be/img/logo/tallstack.webp" class="rounded" alt="tall-stack"/>
@@ -57,7 +57,7 @@ This <b>TallStack</b> application is build using :
         The application must be served in HTTPS mode, not in HTTP.<br/>
     </li>
     <li>
-        At least <a href="https://www.php.net/" target="_blank">PHP</a> 8.3, supporting Laravel 12.<br/>
+        At least <a href="https://www.php.net/" target="_blank">PHP</a> 8.4, supporting Laravel 12.<br/>
     </li>
     <li>
         At least <a href="https://www.mysql.com/" target="_blank">MySQL</a> 8.0.1 or <a href="https://mariadb.com/" target="_blank">MariaDB</a> 10.2.2 or an equivalent database, supporting <a href="https://dev.mysql.com/doc/refman/8.0/en/with.html" target="_blank">Recursive Common Table Expressions</a>.
@@ -220,6 +220,7 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
     <li>Offcanvas menu</li>
     <li>Multiple image upload with possibility of watermarking, photo carousel with navigation</li>
     <li>Multiple documents upload</li>
+    <li>Event management & timeline overview</li>
 </ul>
 
 ### Special features
@@ -295,7 +296,11 @@ To date, version 7 has not been fully implemented in any open-source php based p
 </ul>
 
 Translations can be added by submitting a <b>Pull Request</b> to the project.<br />
-Translation integrity can be checked by issuing the command `php artisan translations:check --excludedDirectories=vendor`
+Translation integrity can be checked by issuing the command:
+
+```bash
+php artisan translations:check --excludedDirectories=vendor
+```
 
 Instructions on how to add a language can be found in <a href="https://github.com/MGeurts/genealogy/blob/main/README-LANGUAGES.md" target="_blank">README-LANGUAGES.md<br/>
 
@@ -313,23 +318,45 @@ Both the <b>ancestors</b> and <b>descendants</b> family trees are build using <a
 
 create a new project folder, cd into the folder
 
-`git clone https://github.com/MGeurts/genealogy.git .`
+```bash
+git clone https://github.com/MGeurts/genealogy.git .
+```
 
-`cp .env.example .env`
+```bash
+cp .env.example .env
+```
 
 make the needed changes regarding name, url, database connection & mail server
 
-`composer install`
+```bash
+composer install
+```
 
-`php artisan key:generate`
+```bash
+php artisan key:generate
+```
 
-`php artisan storage:link`
+```bash
+php artisan storage:link
+```
 
-`php artisan migrate:fresh --seed`
+```bash
+php artisan migrate:fresh --seed
+```
 
-`npm install & npm run build`
+```bash
+npm install && npm run build
+```
 
-`php artisan serve` or `npm run dev`
+```bash
+php artisan serve
+```
+
+or
+
+```bash
+npm run dev
+```
 
 ## Updating
 
@@ -343,14 +370,26 @@ Instructions on how to report security issues can be found in <a href="https://g
 
 Testing is done using <a href="https://pestphp.com/">Pest</a>.<br/>
 
-Command: `php artisan test` or `./vendor/bin/pest`<br/>
+Command:
+
+```bash
+php artisan test
+```
+
+or
+
+```bash
+./vendor/bin/pest
+```
 
 <b>Production (or local development) data</b> should be stored in a MySQL or MariaDB database configured in `.env`.<br /><br />
 <b>Testing data</b> should be stored in a separate MySQL or MariaDB database configured in `.env.testing` to avoid interfering with the production or development data.<br /><br />
 
 Command to create the testing MySQL database:
 
-`php artisan migrate --env=testing`
+```bash
+php artisan migrate --env=testing
+```
 
 ## Contributing
 
@@ -369,9 +408,9 @@ Visit the <a href="https://genealogy.kreaweb.be/help" target="_blank">demo proje
 
 Maintaining this project takes time and effort. If you find it useful, consider supporting me:
 
--   [![Star on GitHub](https://img.shields.io/github/stars/MGeurts/genealogy?style=social)](https://github.com/MGeurts/genealogy)
--   [![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/MGeurtsKREAWEB)
--   [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/MGeurts)
+- [![Star on GitHub](https://img.shields.io/github/stars/MGeurts/genealogy?style=social)](https://github.com/MGeurts/genealogy)
+- [![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/MGeurtsKREAWEB)
+- [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/MGeurts)
 
 > Your support helps me improve and maintain [Genealogy](https://github.com/MGeurts/genealogy) and other open-source tools. Every bit is appreciated. Thank you! 🙏
 

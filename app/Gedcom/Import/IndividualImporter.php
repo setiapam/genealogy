@@ -18,6 +18,7 @@ class IndividualImporter
 {
     private Team $team;
 
+    /** @var array<string, int> */
     private array $personMap = [];
 
     public function __construct(Team $team)
@@ -28,9 +29,9 @@ class IndividualImporter
     /**
      * Import individuals from parsed GEDCOM data
      *
-     * @param  array  $individuals  Parsed individual records
+     * @param  array<string, array{id: string, type: string, data: array<mixed>}|null>  $individuals  Parsed individual records
      * @param  MediaImportHandler|null  $mediaHandler  Optional media handler for extracting references
-     * @return array Mapping of GEDCOM ID to Person database ID
+     * @return array<string, int> Mapping of GEDCOM ID to Person database ID
      */
     public function import(array $individuals, ?MediaImportHandler $mediaHandler = null): array
     {
@@ -84,6 +85,8 @@ class IndividualImporter
 
     /**
      * Get the person mapping
+     *
+     * @return array<string, int>
      */
     public function getPersonMap(): array
     {
@@ -92,6 +95,9 @@ class IndividualImporter
 
     /**
      * Extract person data from GEDCOM individual record
+     *
+     * @param  array{id: string, type: string, data: array<mixed>}|null  $individual
+     * @return array{firstname: ?string, surname: ?string, birthname: ?string, nickname: ?string, sex: string, dob: ?string, yob: ?int, pob: ?string, dod: ?string, yod: ?int, pod: ?string, summary: ?string, metadata: array<string, string>}
      */
     private function extractPersonData(?array $individual): array
     {
@@ -120,10 +126,54 @@ class IndividualImporter
         foreach ($individual['data'] as $field) {
             switch ($field['tag']) {
                 case 'NAME':
-                    $nameInfo          = $this->parseName($field['value']);
-                    $data['firstname'] = $nameInfo['given'];
-                    $data['surname']   = $nameInfo['surname'];
-                    $data['birthname'] = $nameInfo['surname']; // Default birthname to surname
+                    $nameInfo  = $this->parseName($field['value']);
+                    $subfields = $field['data'] ?? [];
+
+                    // Determine the type of this NAME record (default = primary name)
+                    $nameType = null;
+                    foreach ($subfields as $sub) {
+                        if ($sub['tag'] === 'TYPE') {
+                            $nameType = mb_strtolower(mb_trim($sub['value']));
+                            break;
+                        }
+                    }
+
+                    if ($nameType === 'birth') {
+                        // This NAME record carries the birth/maiden name.
+                        // Prefer the explicit SURN subfield; fall back to the parsed surname.
+                        $birthSurname = null;
+                        foreach ($subfields as $sub) {
+                            if ($sub['tag'] === 'SURN') {
+                                $birthSurname = mb_trim($sub['value']) ?: null;
+                                break;
+                            }
+                        }
+                        $data['birthname'] = $birthSurname ?? $nameInfo['surname'];
+                    } else {
+                        // Primary (or untyped) NAME record — sets given name and surname.
+                        // Prefer the explicit GIVN/SURN subfields when present.
+                        $givenFromSub   = null;
+                        $surnameFromSub = null;
+                        foreach ($subfields as $sub) {
+                            if ($sub['tag'] === 'GIVN') {
+                                $givenFromSub = mb_trim($sub['value']) ?: null;
+                            } elseif ($sub['tag'] === 'SURN') {
+                                $surnameFromSub = mb_trim($sub['value']) ?: null;
+                            } elseif ($sub['tag'] === 'NICK' && $data['nickname'] === null) {
+                                // Only take the first NICK encountered across all NAME records
+                                $data['nickname'] = mb_trim($sub['value']) ?: null;
+                            }
+                        }
+
+                        $data['firstname'] = $givenFromSub ?? $nameInfo['given'];
+                        $data['surname']   = $surnameFromSub ?? $nameInfo['surname'];
+
+                        // Default birthname to the primary surname; a subsequent
+                        // NAME TYPE birth record will override this if present.
+                        if ($data['birthname'] === null) {
+                            $data['birthname'] = $data['surname'];
+                        }
+                    }
                     break;
 
                 case 'SEX':
@@ -263,15 +313,6 @@ class IndividualImporter
                     // Note: OBJE tags are handled by MediaImportHandler
                     // We skip them here to avoid duplication
             }
-
-            // Handle nickname from NAME variations
-            if ($field['tag'] === 'NAME' && isset($field['data'])) {
-                foreach ($field['data'] as $nameField) {
-                    if ($nameField['tag'] === 'NICK') {
-                        $data['nickname'] = $nameField['value'];
-                    }
-                }
-            }
         }
 
         // Fallback: if no BURI but death place exists → use as cemetery address
@@ -284,6 +325,8 @@ class IndividualImporter
 
     /**
      * Parse GEDCOM name format
+     *
+     * @return array{given: ?string, surname: ?string}
      */
     private function parseName(string $name): array
     {
@@ -303,6 +346,9 @@ class IndividualImporter
 
     /**
      * Extract event data (birth, death, etc.)
+     *
+     * @param  array<string, mixed>  $eventField
+     * @return array{date: ?string, year: ?int, place: ?string}
      */
     private function extractEvent(array $eventField): array
     {
@@ -329,6 +375,8 @@ class IndividualImporter
 
     /**
      * Parse GEDCOM date formats
+     *
+     * @return array{date: ?string, year: ?int}
      */
     private function parseDate(string $dateString): array
     {
@@ -336,6 +384,11 @@ class IndividualImporter
 
         // Remove common prefixes
         $dateString = preg_replace('/^(ABT|EST|CAL|AFT|BEF|BET)\s+/i', '', mb_trim($dateString));
+
+        // Ensure $dateString is not null after preg_replace
+        if ($dateString === null) {
+            return $result;
+        }
 
         // Extract year
         if (preg_match('/\b(\d{4})\b/', $dateString, $matches)) {
@@ -379,6 +432,9 @@ class IndividualImporter
 
     /**
      * Truncate person data to fit database column limits
+     *
+     * @param  array{firstname: ?string, surname: ?string, birthname: ?string, nickname: ?string, sex: string, dob: ?string, yob: ?int, pob: ?string, dod: ?string, yod: ?int, pod: ?string, summary: ?string, metadata: array<string, string>}  $personData
+     * @return array{firstname: ?string, surname: ?string, birthname: ?string, nickname: ?string, sex: string, dob: ?string, yob: ?int, pob: ?string, dod: ?string, yod: ?int, pod: ?string, summary: ?string, metadata: array<string, string>}
      */
     private function truncatePersonData(array $personData): array
     {
@@ -394,11 +450,11 @@ class IndividualImporter
 
         foreach ($limits as $field => $limit) {
             if (! empty($personData[$field]) && mb_strlen($personData[$field]) > $limit) {
+                $originalLength     = mb_strlen($personData[$field]);
                 $personData[$field] = mb_substr($personData[$field], 0, $limit);
 
-                // Log truncation for awareness
-                Log::info("GEDCOM Import: Truncated {$field}", [
-                    'original_length' => mb_strlen($personData[$field] ?? ''),
+                Log::debug("GEDCOM Import: Truncated {$field}", [
+                    'original_length' => $originalLength,  // ✅
                     'truncated_to'    => $limit,
                 ]);
             }

@@ -7,22 +7,12 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class ParentsIdExclusive implements ValidationRule
+final class ParentsIdExclusive implements ValidationRule
 {
-    protected $fatherId;
-
-    protected $motherId;
-
-    public function __construct($fatherId, $motherId)
-    {
-        $this->fatherId = $fatherId;
-        $this->motherId = $motherId;
-    }
+    public function __construct(private ?int $fatherId, private ?int $motherId) {}
 
     /**
      * Run the validation rule.
-     *
-     * @param  Closure(string, string): void  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

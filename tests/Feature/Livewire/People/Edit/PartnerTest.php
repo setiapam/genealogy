@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Livewire\People\Edit\Partner;
 use App\Models\Couple;
 use App\Models\Person;
 use App\Models\Team;
@@ -11,7 +10,7 @@ use Livewire\Livewire;
 
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-it('does not detect self-overlap when editing a couple', function (): void {
+it('can save an existing couple without triggering a false overlap error', function (): void {
     // Create user and team, and assign the team to the user
     $user = User::factory()->create();
     $team = Team::factory()->create([
@@ -39,7 +38,7 @@ it('does not detect self-overlap when editing a couple', function (): void {
     ]);
 
     // Load the Livewire component to simulate editing this couple
-    Livewire::test(Partner::class, [
+    Livewire::test('people::edit.partner', [
         'person' => $person,
         'couple' => $couple,
     ])
@@ -51,7 +50,7 @@ it('does not detect self-overlap when editing a couple', function (): void {
         ->set('has_ended', true)
         ->call('savePartner')
         ->assertHasNoErrors()
-        ->assertRedirect('/people/' . $person->id);
+        ->assertDispatched('couple_updated');
 
     // Assert update was saved correctly
     $this->assertDatabaseHas('couples', [

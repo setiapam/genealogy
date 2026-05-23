@@ -38,10 +38,17 @@ final class Import implements CreatesTeams
      */
     public function __construct(?string $teamName, ?string $teamDescription)
     {
-        $this->user = auth()->user();
+        $user = auth()->user();
+
+        // Ensure user is authenticated
+        if (! $user instanceof User) {
+            throw new Exception('User must be authenticated to import GEDCOM files');
+        }
+
+        $this->user = $user;
 
         // Create new team for this import
-        $this->team = $this->createTeam($teamName, $teamDescription);
+        $this->team = $this->createTeam($teamName ?? 'Imported Family Tree', $teamDescription);
 
         // Initialize sub-components
         $this->parser             = new GedcomParser();
@@ -54,7 +61,7 @@ final class Import implements CreatesTeams
      * Import GEDCOM file content (text only)
      *
      * @param  string  $gedcomContent  Raw GEDCOM text content
-     * @return array Import results
+     * @return array{success: bool, team?: string, individuals_imported?: int, families_imported?: int, message?: string, media_stats?: array<string, int>, error?: string} Import results
      */
     public function import(string $gedcomContent): array
     {
@@ -65,7 +72,7 @@ final class Import implements CreatesTeams
      * Import GEDCOM from ZIP file (with media)
      *
      * @param  string  $zipPath  Path to ZIP file
-     * @return array Import results
+     * @return array{success: bool, team?: string, individuals_imported?: int, families_imported?: int, message?: string, media_stats?: array<string, int>, error?: string} Import results
      */
     public function importFromZip(string $zipPath): array
     {
@@ -73,13 +80,19 @@ final class Import implements CreatesTeams
 
         try {
             // Extract ZIP file
-            Log::info('Extracting ZIP file', ['path' => $zipPath]);
+            Log::debug('Extracting ZIP file', ['path' => $zipPath]);
             $zipImporter->extract($zipPath);
 
             $gedcomContent = $zipImporter->getGedcomContent();
-            $mediaFiles    = $zipImporter->getMediaFiles();
 
-            Log::info('ZIP extracted successfully', [
+            // Ensure we have valid GEDCOM content
+            if ($gedcomContent === null) {
+                throw new Exception('No GEDCOM content found in ZIP file');
+            }
+
+            $mediaFiles = $zipImporter->getMediaFiles();
+
+            Log::debug('ZIP extracted successfully', [
                 'media_files' => count($mediaFiles),
                 'gedcom_size' => mb_strlen($gedcomContent),
             ]);
@@ -103,6 +116,8 @@ final class Import implements CreatesTeams
 
     /**
      * Get import statistics
+     *
+     * @return array{individuals_parsed: int, families_parsed: int, individuals_imported: int, families_imported: int, media_references?: int}
      */
     public function getStatistics(): array
     {
@@ -126,8 +141,8 @@ final class Import implements CreatesTeams
      * Core import processing logic
      *
      * @param  string  $gedcomContent  GEDCOM text content
-     * @param  array  $mediaFiles  Array of basename => filepath for media
-     * @return array Import results
+     * @param  array<string, string>  $mediaFiles  Array of basename => filepath for media
+     * @return array{success: bool, team?: string, individuals_imported?: int, families_imported?: int, message?: string, media_stats?: array<string, int>, error?: string} Import results
      */
     private function processImport(string $gedcomContent, array $mediaFiles): array
     {
@@ -145,7 +160,7 @@ final class Import implements CreatesTeams
                 // Parse media objects from GEDCOM content BEFORE parsing individuals
                 $this->mediaHandler->parseMediaObjects($gedcomContent);
 
-                Log::info('Media handler initialized', [
+                Log::debug('Media handler initialized', [
                     'files_count'         => count($mediaFiles),
                     'media_objects_count' => count($this->mediaHandler->getMediaObjects()),
                 ]);
@@ -154,7 +169,7 @@ final class Import implements CreatesTeams
             // Parse GEDCOM content
             $parsedData = $this->parser->parse($gedcomContent);
 
-            Log::info('GEDCOM parsed', [
+            Log::debug('GEDCOM parsed', [
                 'individuals' => count($parsedData->getIndividuals()),
                 'families'    => count($parsedData->getFamilies()),
             ]);
@@ -165,7 +180,7 @@ final class Import implements CreatesTeams
                 $this->mediaHandler
             );
 
-            Log::info('Individuals imported', [
+            Log::debug('Individuals imported', [
                 'count' => count($personMap),
             ]);
 
@@ -175,21 +190,21 @@ final class Import implements CreatesTeams
                 $personMap
             );
 
-            Log::info('Families imported', [
+            Log::debug('Families imported', [
                 'count' => count($familyMap),
             ]);
 
             // Create couples from families
             $this->coupleCreator->create($familyMap, $personMap);
 
-            Log::info('Couples created');
+            Log::debug('Couples created');
 
             // Import media files if available
             $mediaStats = null;
             if ($this->mediaHandler) {
-                Log::info('Starting media import');
+                Log::debug('Starting media import');
                 $mediaStats = $this->mediaHandler->importMediaToPersons($personMap);
-                Log::info('Media import complete', $mediaStats);
+                Log::debug('Media import complete', $mediaStats);
             }
 
             DB::commit();
@@ -227,15 +242,18 @@ final class Import implements CreatesTeams
     {
         AddingTeam::dispatch($this->user);
 
-        $this->user->switchTeam($team = $this->user->ownedTeams()->create([
+        /** @var Team $team */
+        $team = $this->user->ownedTeams()->create([
             'name'          => $name,
             'description'   => $description ?? null,
             'personal_team' => false,
-        ]));
+        ]);
+
+        $this->user->switchTeam($team);
 
         // Create team photo folder
-        if (! Storage::disk('photos')->exists($team->id)) {
-            Storage::disk('photos')->makeDirectory($team->id);
+        if (! Storage::disk('photos')->exists((string) $team->id)) {
+            Storage::disk('photos')->makeDirectory((string) $team->id);
         }
 
         return $team;

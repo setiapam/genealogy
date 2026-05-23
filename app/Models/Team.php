@@ -11,19 +11,28 @@ use Laravel\Jetstream\Events\TeamCreated;
 use Laravel\Jetstream\Events\TeamDeleted;
 use Laravel\Jetstream\Events\TeamUpdated;
 use Laravel\Jetstream\Team as JetstreamTeam;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Models\Activity;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $name
+ * @property string|null $description
+ * @property bool $personal_team
+ * @property-read User $owner
+ */
 final class Team extends JetstreamTeam
 {
+    /** @use HasFactory<\Database\Factories\PersonFactory> */
     use HasFactory;
+
     use LogsActivity;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -59,7 +68,7 @@ final class Team extends JetstreamTeam
                 'personal_team',
             ])
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
+            ->dontLogEmptyChanges();
     }
 
     public function tapActivity(Activity $activity, string $eventName): void
@@ -78,7 +87,7 @@ final class Team extends JetstreamTeam
         if (! $currentTeam || $currentTeam->id === $this->id) {
             // Try to use the user's personal team as fallback
             $personalTeam      = $user->personalTeam();
-            $activity->team_id = $personalTeam?->id;
+            $activity->team_id = $personalTeam->id;
         } else {
             $activity->team_id = $currentTeam->id;
         }
@@ -128,13 +137,21 @@ final class Team extends JetstreamTeam
     /* -------------------------------------------------------------------------------------------- */
     // Relations
     /* -------------------------------------------------------------------------------------------- */
-    /* returns ALL PERSONS (n Person) */
+    /**
+     * Returns ALL PERSONS (n Person)
+     *
+     * @return HasMany<Person, $this>
+     */
     public function persons(): HasMany
     {
         return $this->hasMany(Person::class);
     }
 
-    /* returns ALL COUPLES (n Couple) */
+    /**
+     * Returns ALL COUPLES (n Couple)
+     *
+     * @return HasMany<Couple, $this>
+     */
     public function couples(): HasMany
     {
         return $this->hasMany(Couple::class);

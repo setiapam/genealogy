@@ -12,12 +12,13 @@ use Illuminate\Support\Carbon;
 
 final class Userlog extends Model
 {
+    /** @use HasFactory<\Database\Factories\PersonFactory> */
     use HasFactory;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -28,6 +29,9 @@ final class Userlog extends Model
     /* -------------------------------------------------------------------------------------------- */
     // Relationships
     /* -------------------------------------------------------------------------------------------- */
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -36,6 +40,9 @@ final class Userlog extends Model
     /* -------------------------------------------------------------------------------------------- */
     // Accessors & Mutators
     /* -------------------------------------------------------------------------------------------- */
+    /**
+     * @return Attribute<string, never>
+     */
     public function date(): Attribute
     {
         return new Attribute(
@@ -43,6 +50,9 @@ final class Userlog extends Model
         );
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     public function time(): Attribute
     {
         return new Attribute(

@@ -15,6 +15,7 @@ final class UserLogin
      */
     public function handle(Login $event): void
     {
+        /** @var \App\Models\User $user */
         $user = $event->user;
 
         // -----------------------------------------------------------------------
@@ -29,7 +30,7 @@ final class UserLogin
         // Update user's last seen timestamp
         // -----------------------------------------------------------------------
         $user->timestamps = false;
-        $user->seen_at    = now()->getTimestamp();
+        $user->seen_at    = \Carbon\Carbon::now();
         $user->saveQuietly();
 
         // -----------------------------------------------------------------------
@@ -48,7 +49,14 @@ final class UserLogin
         // -----------------------------------------------------------------------
         // Exclude your own IP without storing or exposing it
         // -----------------------------------------------------------------------
-        $requestIpHash = hash('sha256', request()->ip());
+        $requestIp = request()->ip();
+
+        // Skip if IP is not available
+        if (! $requestIp) {
+            return;
+        }
+
+        $requestIpHash = hash('sha256', $requestIp);
         $devIpHash     = config('app.dev_ip_hash');
 
         if ($devIpHash && hash_equals($requestIpHash, $devIpHash)) {

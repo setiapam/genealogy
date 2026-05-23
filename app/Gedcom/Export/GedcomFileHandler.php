@@ -130,7 +130,13 @@ class GedcomFileHandler
         $tempDir = Storage::path('temp');
         $pattern = $tempDir . DIRECTORY_SEPARATOR . $this->basename . '.*';
 
-        foreach (glob($pattern) as $file) {
+        $files = glob($pattern);
+
+        if ($files === false) {
+            return;
+        }
+
+        foreach ($files as $file) {
             @unlink($file);
         }
     }
@@ -212,7 +218,7 @@ class GedcomFileHandler
             throw new RuntimeException('ZIP file is empty after creation: ' . $zipPath);
         }
 
-        Log::info("Created ZIP with GEDCOM file and {$addedFiles} media files");
+        Log::debug("Created ZIP with GEDCOM file and {$addedFiles} media files");
     }
 
     /**

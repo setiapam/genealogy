@@ -7,10 +7,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Models\Activity;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
+/**
+ * @property int $id
+ * @property int $person_id
+ * @property string $key
+ * @property string|null $value
+ */
 final class PersonMetadata extends Model
 {
     use LogsActivity;
@@ -25,7 +30,7 @@ final class PersonMetadata extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'person_id',
@@ -47,18 +52,21 @@ final class PersonMetadata extends Model
                 'value',
             ])
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
+            ->dontLogEmptyChanges();
     }
 
     public function tapActivity(Activity $activity, string $eventName): void
     {
-        $activity->team_id = auth()->user()?->currentTeam?->id ?? null;
+        $activity->team_id = auth()->user()?->currentTeam->id ?? null;
     }
 
     /* -------------------------------------------------------------------------------------------- */
     // Relations
     /* -------------------------------------------------------------------------------------------- */
     /* returns PERSON (1 Person) */
+    /**
+     * @return BelongsTo<Person, covariant PersonMetadata>
+     */
     public function person(): BelongsTo
     {
         return $this->belongsTo(Person::class);
@@ -67,6 +75,9 @@ final class PersonMetadata extends Model
     /* -------------------------------------------------------------------------------------------- */
     // Accessors & Mutators
     /* -------------------------------------------------------------------------------------------- */
+    /**
+     * @return Attribute<string, string>
+     */
     public function key(): Attribute
     {
         return new Attribute(

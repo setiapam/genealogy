@@ -7,6 +7,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -19,9 +20,8 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Override;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Models\Activity;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * User Model
@@ -47,6 +47,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon|null $deleted_at
  * @property-read string|null $name
  * @property-read string $profile_photo_url
+ * @property-read Team|null $currentTeam
  */
 final class User extends Authenticatable
     // ---------------------------------------------------------------------------------------
@@ -56,7 +57,10 @@ final class User extends Authenticatable
     // ---------------------------------------------------------------------------------------
 {
     use HasApiTokens;
+
+    /** @use HasFactory<\Database\Factories\PersonFactory> */
     use HasFactory;
+
     use HasProfilePhoto;
     use HasTeams;
     use LogsActivity;
@@ -67,7 +71,7 @@ final class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'firstname',
@@ -86,7 +90,7 @@ final class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -98,7 +102,7 @@ final class User extends Authenticatable
     /**
      * The accessors to append to the model's array form.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $appends = [
         'name',
@@ -128,7 +132,7 @@ final class User extends Authenticatable
                 'is_developer',
             ])
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
+            ->dontLogEmptyChanges();
     }
 
     public function tapActivity(Activity $activity, string $eventName): void
@@ -144,9 +148,12 @@ final class User extends Authenticatable
 
     /**
      * Get statistics for all teams owned by this user
+     *
+     * @return EloquentCollection<int, Team>
      */
     public function teamsStatistics(): Collection
     {
+        /** @var EloquentCollection<int, Team> */
         return $this->ownedTeams()->withCount(['users as users_count', 'persons as persons_count', 'couples as couples_count'])->get(['id', 'name', 'personal_team']);
     }
 
@@ -180,7 +187,11 @@ final class User extends Authenticatable
     /* -------------------------------------------------------------------------------------------- */
     // Relations
     /* -------------------------------------------------------------------------------------------- */
-    /* returns ALL USERLOGS (n Userlog) */
+    /**
+     * Returns ALL USERLOGS (n Userlog)
+     *
+     * @return HasMany<Userlog, $this>
+     */
     public function userlogs(): HasMany
     {
         return $this->hasMany(Userlog::class);
@@ -203,11 +214,14 @@ final class User extends Authenticatable
     /* -------------------------------------------------------------------------------------------- */
     // Accessors & Mutators
     /* -------------------------------------------------------------------------------------------- */
+    /** @return Attribute<string, never> */
     protected function name(): Attribute
     {
-        return Attribute::get(
-            fn () => ($name = Str::of("{$this->firstname} {$this->surname}")->trim()->value()) === '' ? null : $name
-        );
+        return Attribute::get(function (): string {
+            $name = Str::of("{$this->firstname} {$this->surname}")->trim()->value();
+
+            return $name === '' ? '' : $name;
+        });
     }
 
     /**

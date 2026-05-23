@@ -17,7 +17,7 @@ final class RemoveTeamMember implements RemovesTeamMembers
     /**
      * Remove the team member from the given team.
      */
-    public function remove(User $user, Team $team, User $teamMember)
+    public function remove(User $user, Team $team, User $teamMember): void
     {
         $role = $teamMember->teamRole($team);
 
@@ -26,6 +26,11 @@ final class RemoveTeamMember implements RemovesTeamMembers
         $this->ensureUserDoesNotOwnTeam($teamMember, $team);
 
         $team->removeUser($teamMember);
+
+        // set personal team as current team
+        $teamMember->forceFill([
+            'current_team_id' => $teamMember->personalTeam()->id,
+        ])->save();
 
         TeamMemberRemoved::dispatch($team, $teamMember);
 
@@ -41,13 +46,11 @@ final class RemoveTeamMember implements RemovesTeamMembers
                 ->withProperties([
                     'email' => $teamMember->email,
                     'name'  => $teamMember->name,
-                    'role'  => $role->name,
+                    'role'  => $role->name ?? 'N/A',
                 ])
                 ->log(__('team.member') . ' ' . __('app.event_removed'));
         });
         /* -------------------------------------------------------------------------------------------- */
-
-        return redirect('/teams/' . $team->id);
     }
 
     /**

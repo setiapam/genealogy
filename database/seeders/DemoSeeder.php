@@ -6,11 +6,12 @@ namespace Database\Seeders;
 
 use App\Models\Couple;
 use App\Models\Person;
+use App\Models\PersonEvent;
 use App\Models\PersonMetadata;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Spatie\Activitylog\Facades\CauserResolver;
+use Spatie\Activitylog\Facades\Activity;
 
 final class DemoSeeder extends Seeder
 {
@@ -35,7 +36,7 @@ final class DemoSeeder extends Seeder
     {
         $manager = User::where('surname', 'Manager')->first();
         auth()->login($manager);
-        CauserResolver::setCauser($manager);
+        Activity::defaultCauser($manager);
 
         $this->importBritishRoyalsPeople();
         $this->importBritishRoyalsCouples();
@@ -45,7 +46,7 @@ final class DemoSeeder extends Seeder
 
         $editor = User::where('surname', 'Editor')->first();
         auth()->login($editor);
-        CauserResolver::setCauser($editor);
+        Activity::defaultCauser($editor);
 
         $this->importKennedyPeople();
         $this->importKennedyCouples();
@@ -54,7 +55,7 @@ final class DemoSeeder extends Seeder
 
         $developer = User::where('surname', 'Developer')->first();
         auth()->login($developer);
-        CauserResolver::setCauser($developer);
+        Activity::defaultCauser($developer);
 
         $this->generatedeveloperTestData();
 
@@ -353,11 +354,31 @@ final class DemoSeeder extends Seeder
         // -----------------------------------------------------------------------
         // address
         // -----------------------------------------------------------------------
-        Person::findOrFail(5)->update([
+        $person = Person::findOrFail(5);
+
+        $person->update([
             'street'      => 'Royal Lodge',
             'postal_code' => 'SL4 2JD',
             'city'        => 'Windsor',
             'country'     => 'gb',
+        ]);
+
+        // -----------------------------------------------------------------------
+        // events
+        // -----------------------------------------------------------------------
+        PersonEvent::create([
+            'person_id'   => $person->id,
+            'type'        => PersonEvent::TYPE_BAPTISM,
+            'description' => 'He was baptized in the Music Room at Buckingham Palace by the Archbishop of Canterbury. He was named, Andrew Albert Christian Edward.',
+            'date'        => '1960-04-08',
+            'place'       => 'Music Room at Buckingham Palace, London, England',
+        ]);
+
+        PersonEvent::create([
+            'person_id'   => $person->id,
+            'type'        => PersonEvent::TYPE_MILITARY_SERVICE,
+            'description' => 'He served 22 years (1979 - 2001) in the Royal Navy, primarily as a helicopter pilot, including active duty in the Falklands War in 1982, where he flew Sea King helicopters and acted as a decoy for Exocet missiles. He retired as a Commander in 2001 but later received honorary promotions, including to Vice-Admiral in 2015, though he was stripped of all military titles and affiliations by Queen Elizabeth II in 2022 following scrutiny over his association with convicted sex offender Jeffrey Epstein.',
+            'year'        => '1979',
         ]);
     }
 

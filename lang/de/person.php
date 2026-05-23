@@ -69,6 +69,7 @@ return [
     'edit_person'       => 'Person bearbeiten',
     'edit_profile'      => 'Profil bearbeiten',
     'edit_relationship' => 'Beziehung bearbeiten',
+    'edit_events'       => 'Ereignisse bearbeiten',
 
     'delete_child'        => 'Untergeordnetes Kind trennen',
     'delete_person'       => 'Person löschen',
@@ -110,31 +111,38 @@ return [
     'cemetery_location' => 'Ort des Friedhofs',
 
     // Files
-    'files'            => 'Dateien',
-    'files_saved'      => '[0] Keine Dateien gespeicherd|[1] Datei gespeicherd|[2,*] Dateien gespeicherd',
-    'file'             => 'Datei gelöscht',
-    'file_deleted'     => 'Datei',
-    'upload_files'     => 'Dateien hochladen',
-    'upload_files_tip' => 'Ziehen Sie Ihr neue Dateien hierher ...',
+    'files'                  => 'Dateien',
+    'files_saved'            => '[0] Keine Dateien gespeicherd|[1] Datei gespeicherd|[2,*] Dateien gespeicherd',
+    'file'                   => 'Datei gelöscht',
+    'file_deleted'           => 'Datei',
+    'upload_files'           => 'Dateien hochladen',
+    'upload_files_tip'       => 'Ziehen Sie Ihr neue Dateien hierher ...',
+    'no_valid_files_to_save' => 'Keine gültigen Dateien zum Speichern',
+    'files_invalid'          => '{1} :count Datei war ungültig und wurde übersprungen|[2,*] :count Dateien waren ungültig und wurden übersprungen',
+    'files_save_failed'      => 'Dateien konnten nicht gespeichert werden',
 
     'upload_accept_types' => 'Erlaubt : :types',
     'upload_max_size'     => 'Maximale Größe : :max KB',
 
     // Photo
-    'avatar'                   => 'Avatar',
-    'edit_photos'              => 'Fotos bearbeiten',
-    'photo_delete_failed'      => 'Löschen des Fotos fehlgeschlagen',
-    'photo_deleted'            => 'Foto gelöscht',
-    'photo'                    => 'Foto',
-    'photos'                   => 'Fotos',
-    'photos_saved'             => '[0] Keine Fotos gespeichert|[1] Foto gespeichert|[2,*] :count Fotos gespeichert',
-    'photos_save_failed'       => 'Speichern von (einigen) Fotos fehlgeschlagen',
-    'photos_existing'          => 'Vorhandene Fotos',
-    'photo_set_primary'        => 'Als primäres Foto festlegen',
-    'photo_set_primary_failed' => 'Primäres Foto konnte nicht festgelegt werden',
-    'photo_is_set_primary'     => 'Neues Foto wurde als primäres Foto festgelegt',
-    'upload_photos'            => 'Fotos hochladen',
-    'upload_photos_tip'        => 'Ziehe deine neuen Fotos hierher ...',
+    'avatar'                      => 'Avatar',
+    'edit_photos'                 => 'Fotos bearbeiten',
+    'invalid_image_file_detected' => 'Ungültige Bilddatei erkannt',
+    'photo_delete_failed'         => 'Löschen des Fotos fehlgeschlagen',
+    'photo_deleted'               => 'Foto gelöscht',
+    'photo'                       => 'Foto',
+    'photos'                      => 'Fotos',
+    'photo_not_found'             => 'Foto nicht gefunden',
+    'photos_saved'                => '[0] Keine Fotos gespeichert|[1] Foto gespeichert|[2,*] :count Fotos gespeichert',
+    'photos_save_failed'          => 'Speichern von (einigen) Fotos fehlgeschlagen',
+    'photos_existing'             => 'Vorhandene Fotos',
+    'photo_set_primary'           => 'Als primäres Foto festlegen',
+    'photo_set_primary_failed'    => 'Primäres Foto konnte nicht festgelegt werden',
+    'photo_is_set_primary'        => 'Neues Foto wurde als primäres Foto festgelegt',
+    'upload_photos'               => 'Fotos hochladen',
+    'upload_photos_tip'           => 'Ziehe deine neuen Fotos hierher ...',
+    'no_valid_photos_to_save'     => 'Keine gültigen Fotos zum Speichern',
+    'photos_invalid'              => '{1} :count Foto war ungültig und wurde übersprungen|[2,*] :count Fotos waren ungültig und wurden übersprungen',
 
     // Messages
     'yod_not_matching_dod' => 'Das Sterbejahr muss übereinstimmen mit dem Sterbedatum (:value).',
@@ -169,4 +177,8 @@ return [
     'family_caution_2' => 'Eltern können die biologischen Eltern sein, aber auch nicht-biologische (gleichgeschlechtliche oder Adoptiveltern). In diesem Fall lassen Sie Vater und Mutter einfach leer.',
 
     'parents_id_exclusive' => 'Eltern sind exklusiv. Wenn Sie Eltern setzen, können Sie Vater oder Mutter nicht setzen.',
-];
+
+    'search_similar'       => 'Ähnliche Personen suchen',
+    'similar_persons'      => 'Ähnliche vorhandene Personen',
+    'no_similar_persons'   => 'Noch keine ähnlichen Personen gefunden — geben Sie einige Namen ein und klicken Sie auf die Suchschaltfläche.',
+    'similar_persons_hint' => 'Um zu vermeiden, eine Person mehr als einmal hinzuzufügen, werden hier ähnliche vorhandene Personen angezeigt, nachdem Sie einen Vornamen, Nachnamen, Geburtsnamen oder Spitznamen eingegeben und auf die Suchschaltfläche geklickt haben.', ];

@@ -24,12 +24,13 @@ trait HandlesPhotoUploads
     public function updatingFormUploads(): void
     {
         // Store the current uploads before they get replaced
-        $this->form->backup = is_array($this->form->uploads) ? $this->form->uploads : [];
+        $this->form->backup = $this->form->uploads;
     }
 
     /**
      * Process uploaded files and remove duplicates.
      * Merges new uploads with backup and removes duplicates based on original filename.
+     * Also validates each upload for security.
      *
      * Note: This uses 'form.uploads' path for nested form objects
      */
@@ -39,15 +40,13 @@ trait HandlesPhotoUploads
             return;
         }
 
-        // Convert uploads to array if needed
-        $currentUploads = is_array($this->form->uploads) ? $this->form->uploads : [$this->form->uploads];
-
         // Merge backup with new uploads
-        $allUploads = array_merge($this->form->backup, $currentUploads);
+        $allUploads = array_merge($this->form->backup, $this->form->uploads);
 
-        // Remove duplicates based on original filename
+        // Remove duplicates based on original filename AND validate uploads
         $this->form->uploads = collect($allUploads)
             ->unique(fn (UploadedFile $file): string => $file->getClientOriginalName())
+            ->filter(fn (UploadedFile $file): bool => $this->isValidImageUpload($file))
             ->values()
             ->toArray();
 
@@ -59,7 +58,7 @@ trait HandlesPhotoUploads
      * Handle file deletion from uploads.
      * Removes the specified file from the uploads array and deletes the temporary file.
      *
-     * @param  array  $content  File information containing temporary_name, real_name, extension, size, path, url
+     * @param  array{uuid: string, name: string, size: int, url: string, temporaryUrl: string}  $content
      */
     public function deleteUpload(array $content): void
     {
@@ -81,6 +80,76 @@ trait HandlesPhotoUploads
 
         // Delete temporary file
         $this->deleteTemporaryFile($temporaryName);
+    }
+
+    /**
+     * Validate that uploaded file is a genuine image.
+     * Performs multiple security checks to prevent malicious uploads.
+     *
+     * @param  UploadedFile  $file  The file to validate
+     * @return bool True if file is valid, false otherwise
+     */
+    protected function isValidImageUpload(UploadedFile $file): bool
+    {
+        // Check 1: Verify MIME type matches config
+        $mimeType     = $file->getMimeType();
+        $allowedMimes = array_keys(config('app.upload_photo_accept'));
+
+        if (! in_array($mimeType, $allowedMimes)) {
+            Log::warning('Invalid MIME type detected in upload', [
+                'file'    => $file->getClientOriginalName(),
+                'mime'    => $mimeType,
+                'allowed' => $allowedMimes,
+            ]);
+
+            return false;
+        }
+
+        // Check 2: Verify file is actually an image using getimagesize
+        try {
+            $imageInfo = @getimagesize($file->getRealPath());
+            if ($imageInfo === false) {
+                Log::warning('File failed getimagesize validation', [
+                    'file' => $file->getClientOriginalName(),
+                ]);
+
+                return false;
+            }
+
+            // Verify the image type matches expected types
+            $allowedImageTypes = config('app.upload_photo_validation.image_types');
+
+            if (! in_array($imageInfo[2], $allowedImageTypes)) {
+                Log::warning('Image type not allowed', [
+                    'file' => $file->getClientOriginalName(),
+                    'type' => $imageInfo[2],
+                ]);
+
+                return false;
+            }
+        } catch (Exception $e) {
+            Log::error('Error validating image upload', [
+                'file'  => $file->getClientOriginalName(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+
+        // Check 3: Verify extension matches allowed types
+        $extension         = mb_strtolower($file->getClientOriginalExtension());
+        $allowedExtensions = config('app.upload_photo_validation.extensions');
+
+        if (! in_array($extension, $allowedExtensions)) {
+            Log::warning('Invalid file extension in upload', [
+                'file'      => $file->getClientOriginalName(),
+                'extension' => $extension,
+            ]);
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -108,14 +177,25 @@ trait HandlesPhotoUploads
     /**
      * Get validation rules for photo uploads.
      * Returns array of rules based on application configuration.
+     *
+     * @return array<string, array<int, string|int>>
      */
     protected function getPhotoUploadRules(): array
     {
+        $dimensions = config('app.upload_photo_validation.dimensions');
+
         return [
             'form.uploads.*' => [
-                'file',
-                'mimetypes:' . implode(',', array_keys(config('app.upload_photo_accept'))),
+                'image',
+                'mimes:' . config('app.upload_photo_validation.mimes_rule'),
                 'max:' . config('app.upload_max_size'),
+                sprintf(
+                    'dimensions:min_width=%d,min_height=%d,max_width=%d,max_height=%d',
+                    $dimensions['min_width'],
+                    $dimensions['min_height'],
+                    $dimensions['max_width'],
+                    $dimensions['max_height']
+                ),
             ],
         ];
     }
@@ -123,25 +203,32 @@ trait HandlesPhotoUploads
     /**
      * Get validation messages for photo uploads.
      * Returns localized validation messages.
+     *
+     * @return array<string, string>
      */
     protected function getPhotoUploadMessages(): array
     {
+        $acceptedFormats = implode(', ', array_values(config('app.upload_photo_accept')));
+
         return [
-            'form.uploads.*.file'      => __('validation.file', ['attribute' => __('person.photos')]),
-            'form.uploads.*.mimetypes' => __('validation.mimetypes', [
+            'form.uploads.*.image' => __('validation.image', ['attribute' => __('person.photos')]),
+            'form.uploads.*.mimes' => __('validation.mimes', [
                 'attribute' => __('person.photos'),
-                'values'    => implode(', ', array_values(config('app.upload_photo_accept'))),
+                'values'    => $acceptedFormats,
             ]),
             'form.uploads.*.max' => __('validation.max.file', [
                 'attribute' => __('person.photos'),
                 'max'       => config('app.upload_max_size'),
             ]),
+            'form.uploads.*.dimensions' => __('validation.dimensions', ['attribute' => __('person.photos')]),
         ];
     }
 
     /**
      * Get validation attributes for photo uploads.
      * Returns localized attribute names.
+     *
+     * @return array<string, string>
      */
     protected function getPhotoUploadAttributes(): array
     {
